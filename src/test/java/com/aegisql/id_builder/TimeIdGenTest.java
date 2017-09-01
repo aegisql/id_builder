@@ -1,0 +1,128 @@
+package com.aegisql.id_builder;
+
+import static org.junit.Assert.*;
+
+import java.util.HashSet;
+import java.util.Set;
+
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import com.aegisql.id_builder.impl.TimeBasedIdGenerator;
+
+public class TimeIdGenTest {
+
+	@BeforeClass
+	public static void setUpBeforeClass() throws Exception {
+	}
+
+	@AfterClass
+	public static void tearDownAfterClass() throws Exception {
+	}
+
+	@Before
+	public void setUp() throws Exception {
+	}
+
+	@After
+	public void tearDown() throws Exception {
+	}
+
+	@Test
+	public void test1() {
+		long time = System.currentTimeMillis()/1000;
+		IdSource ig1 = TimeBasedIdGenerator.idGenerator_10x4x5(1001,time);
+		long prev = 0;
+		long next = 0;
+		for( int i = 1; i < 1000001; i++ ) {
+			next = ig1.getId();
+			assertTrue((next != prev));
+			prev = next;
+			if( (i % 100000) == 0 ){
+				System.out.println("1: id["+i+"] = "+ next + " -- " + System.currentTimeMillis()/1000);
+			}
+		}
+		System.out.println("last generated id = "+ next + " time = " + time + "-" + System.currentTimeMillis()/1000);
+	}
+
+	@Test
+	public void test2() throws InterruptedException {
+		long time = System.currentTimeMillis()/1000;
+		IdSource ig1 = TimeBasedIdGenerator.idGenerator_10x4x5(1001,5+(System.currentTimeMillis()/1000));
+		
+		((TimeBasedIdGenerator)ig1).setPastTimeSlowDown(1.5);
+		
+		long prev = 0;
+		long next = 0;
+		for( int i = 1; i < 1000001; i++ ) {
+			next = ig1.getId();
+			assertTrue((next != prev));
+			prev = next;
+			if( (i % 50000) == 0 ){
+				System.out.println("2: id["+i+"] = "+ next + " -- " + System.currentTimeMillis()/1000);
+			}
+		}
+		System.out.println("last generated id = "+ next + " time = "+time+ "-" + System.currentTimeMillis()/1000);
+	}
+
+
+	@Test
+	public void test3() throws InterruptedException {
+		long time = System.currentTimeMillis()/1000;
+		IdSource ig1 = TimeBasedIdGenerator.idGenerator_10x4x5( 3123 );
+		long next = 0;
+		for( int i = 0; i <= 12345; i++ ) {
+			next = ig1.getId();
+		}
+			
+		SplittedId id = TimeBasedIdGenerator.split_10x4x5(next);
+		assertEquals(id.getCurrentId(),12345);
+		assertEquals(id.getDatacenterId(),3);
+		assertEquals(id.getHostId(),123);
+		System.out.println(next+" -- "+id + " @ " + id.getIdDateTime());
+
+	}
+
+	
+	@Test
+	public void test4() throws InterruptedException {
+		long time = System.currentTimeMillis()/1000;
+		IdSource ig1 = TimeBasedIdGenerator.idGenerator_10x4x5(1001,(System.currentTimeMillis()/1000)-5);
+		
+		((TimeBasedIdGenerator)ig1).setPastTimeSlowDown(4);
+		
+		Set<Long> ids = new HashSet<>();
+		
+		final long now = System.currentTimeMillis();
+		final long delay = 5000;
+		
+		((TimeBasedIdGenerator)ig1).setTimestampSupplier(()->{
+			long timestamp = System.currentTimeMillis();
+			if(timestamp - now < delay) {
+				return timestamp;
+			} else {
+				return timestamp - 5000;
+			}
+		});
+		
+		long max = 0;
+		for( int i = 1; i < 1000001; i++ ) {
+			Long next = ig1.getId();
+			assertFalse(ids.contains(next));
+			ids.add(next);
+			SplittedId s = TimeBasedIdGenerator.split_10x4x5(next);
+			max = Math.max(max, s.getCurrentId());
+			if( (i % 50000) == 0 ){
+				System.out.println("4: id["+i+"] = "+ s + " -- " + System.currentTimeMillis()/1000);
+				Thread.sleep(500);
+			}
+		}
+		assertEquals(1000000, ids.size());
+		System.out.println("Max GeneratedID = "+max);
+	}
+
+	
+}
