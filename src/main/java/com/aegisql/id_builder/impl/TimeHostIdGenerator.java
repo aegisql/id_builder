@@ -15,11 +15,9 @@ public class TimeHostIdGenerator implements IdSource {
 	protected final long hostId;
 	protected final long timeIdBase;
 
-	protected long globalCounter = 0;
+	protected long globalCounter       = 0;
 
-	protected long currentId = 0;
-	protected long totalPastTimeId = 0;
-	protected long resetTimeMs = 0;
+	protected long currentId           = 0;
 	protected long currentTimeStampSec = 0;
 	protected final long maxIdPerMSec;
 
@@ -28,20 +26,18 @@ public class TimeHostIdGenerator implements IdSource {
 	private TimeTransformer tf;
 
 	private LongSupplier timestamp = System::currentTimeMillis;
-	private long pastDelta = 0;
 
 	private TimeHostIdGenerator(int hostId, long startTimeStampSec, int maxId, int maxHostId) {
-		this.maxId = maxId;
-		this.maxHostId = maxHostId;
+		this.maxId               = maxId;
+		this.maxHostId           = maxHostId;
 		this.currentTimeStampSec = startTimeStampSec;
-		this.resetTimeMs = timestamp.getAsLong();
 
 		if (hostId > maxHostId) {
 			throw new IdSourceException("Max host ID > " + maxHostId);
 		}
 
-		this.hostId = hostId * (maxId + 1);
-		this.timeIdBase = (maxHostId + 1) * (maxId + 1);
+		this.hostId       = hostId * (maxId + 1);
+		this.timeIdBase   = (maxHostId + 1) * (maxId + 1);
 		this.maxIdPerMSec = (maxId + 1) / 1000;
 		this.setPastShiftSlowDown(1.2);
 	}
@@ -53,8 +49,8 @@ public class TimeHostIdGenerator implements IdSource {
 	@Override
 	public final synchronized long getId() {
 		long nowMs = timestamp.getAsLong();
-		long now = nowMs / 1000;
-		long dt = nowMs - (now * 1000);
+		long now   = nowMs / 1000;
+		long dt    = nowMs - (now * 1000);
 
 		globalCounter++;
 
@@ -73,9 +69,9 @@ public class TimeHostIdGenerator implements IdSource {
 		return tf.transformTimestamp(currentTimeStampSec) * timeIdBase + hostId + returnId;
 	}
 
-	private void sleepMSec(long t) {
+	private void sleepOneMSec() {
 		try {
-			Thread.sleep(t);
+			Thread.sleep(1);
 		} catch (InterruptedException e) {
 			throw new IdSourceException("Unexpected Interruption", e);
 		}
@@ -84,7 +80,7 @@ public class TimeHostIdGenerator implements IdSource {
 	private void currentSecondNextId(long dt) {
 		long maxPredictedId = Math.min(maxId, dt * maxIdPerMSec);
 		if (currentId >= maxPredictedId) {
-			sleepMSec(1);
+			sleepOneMSec();
 			long nowMs = timestamp.getAsLong();
 			long now = nowMs / 1000;
 			if (now > currentTimeStampSec) {
@@ -96,14 +92,11 @@ public class TimeHostIdGenerator implements IdSource {
 	private void initNextSecondId(long nowMs) {
 		currentId = 0;
 		currentTimeStampSec = nowMs / 1000;
-		resetTimeMs = nowMs;
-		totalPastTimeId = 0;
-		pastDelta = 0;
 	}
 
 	private void processShiftToPastTime(long currentTime, long currentTimeMs, long dt) {
 		if (globalCounter % sleepAfter == 0) {
-			sleepMSec(Math.round(1));
+			sleepOneMSec();
 		}
 		if (currentId >= maxId) {
 			currentId = 0;
