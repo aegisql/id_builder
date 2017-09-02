@@ -8,7 +8,7 @@ import com.aegisql.id_builder.IdSource;
 import com.aegisql.id_builder.IdParts;
 import com.aegisql.id_builder.TimeTransformer;
 
-public class TimeBasedIdGenerator implements IdSource {
+public class TimeHostIdGenerator implements IdSource {
 
 	protected final int maxId;
 	protected final int maxHostId;
@@ -30,7 +30,7 @@ public class TimeBasedIdGenerator implements IdSource {
 	private LongSupplier timestamp = System::currentTimeMillis;
 	private long pastDelta = 0;
 
-	private TimeBasedIdGenerator(int hostId, long startTimeStampSec, int maxId, int maxHostId) {
+	private TimeHostIdGenerator(int hostId, long startTimeStampSec, int maxId, int maxHostId) {
 		this.maxId = maxId;
 		this.maxHostId = maxHostId;
 		this.currentTimeStampSec = startTimeStampSec;
@@ -115,24 +115,24 @@ public class TimeBasedIdGenerator implements IdSource {
 		this.tf = tf;
 	}
 
-	public static TimeBasedIdGenerator idGenerator_10x4x5(int hostId, long startTimeStampSec) {
-		TimeBasedIdGenerator idGen = new TimeBasedIdGenerator(hostId, startTimeStampSec, 99999, 9999);
+	public static TimeHostIdGenerator idGenerator_10x4x5(int hostId, long startTimeStampSec) {
+		TimeHostIdGenerator idGen = new TimeHostIdGenerator(hostId, startTimeStampSec, 99999, 9999);
 		idGen.setTimeTransformer(time -> time);
 		return idGen;
 	}
 	
-	public static TimeBasedIdGenerator idGenerator_10x4x5(int hostId) {
+	public static TimeHostIdGenerator idGenerator_10x4x5(int hostId) {
 		return idGenerator_10x4x5(hostId, System.currentTimeMillis() / 1000);
 	}
 
-	public static TimeBasedIdGenerator idGenerator_10x8(long startTimeStampSec) {
-		TimeBasedIdGenerator idGen = new TimeBasedIdGenerator(0, startTimeStampSec, 99999999, 9);
+	public static TimeHostIdGenerator idGenerator_10x8(long startTimeStampSec) {
+		TimeHostIdGenerator idGen = new TimeHostIdGenerator(0, startTimeStampSec, 99999999, 9);
 		idGen.setTimeTransformer(time -> time);
 		return idGen;
 	}
 
-	public static TimeBasedIdGenerator idGenerator_10x8() {
-		TimeBasedIdGenerator idGen = new TimeBasedIdGenerator(0, System.currentTimeMillis()/1000, 99999999, 9);
+	public static TimeHostIdGenerator idGenerator_10x8() {
+		TimeHostIdGenerator idGen = new TimeHostIdGenerator(0, System.currentTimeMillis()/1000, 99999999, 9);
 		idGen.setTimeTransformer(time -> time);
 		return idGen;
 	}
