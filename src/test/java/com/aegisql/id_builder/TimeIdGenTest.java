@@ -53,7 +53,7 @@ public class TimeIdGenTest {
 		long time = System.currentTimeMillis()/1000;
 		IdSource ig1 = TimeBasedIdGenerator.idGenerator_10x4x5(1001,5+(System.currentTimeMillis()/1000));
 		
-		((TimeBasedIdGenerator)ig1).setPastTimeSlowDown(1.5);
+		((TimeBasedIdGenerator)ig1).setPastShiftSlowDown(1.5);
 		
 		long prev = 0;
 		long next = 0;
@@ -92,19 +92,19 @@ public class TimeIdGenTest {
 		long time = System.currentTimeMillis()/1000;
 		IdSource ig1 = TimeBasedIdGenerator.idGenerator_10x4x5(1001,(System.currentTimeMillis()/1000)-5);
 		
-		((TimeBasedIdGenerator)ig1).setPastTimeSlowDown(4);
+		((TimeBasedIdGenerator)ig1).setPastShiftSlowDown(1.25);
 		
 		Set<Long> ids = new HashSet<>();
 		
 		final long now = System.currentTimeMillis();
-		final long delay = 5000;
+		final long delay = 3000;
 		
 		((TimeBasedIdGenerator)ig1).setTimestampSupplier(()->{
 			long timestamp = System.currentTimeMillis();
 			if(timestamp - now < delay) {
 				return timestamp;
 			} else {
-				return timestamp - 5000;
+				return timestamp - 3000;
 			}
 		});
 		
@@ -117,7 +117,7 @@ public class TimeIdGenTest {
 			max = Math.max(max, s.getCurrentId());
 			if( (i % 50000) == 0 ){
 				System.out.println("4: id["+i+"] = "+ s + " -- " + System.currentTimeMillis()/1000);
-				Thread.sleep(500);
+//				Thread.sleep(400);
 			}
 		}
 		assertEquals(1000000, ids.size());
