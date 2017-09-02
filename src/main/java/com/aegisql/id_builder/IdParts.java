@@ -2,14 +2,14 @@ package com.aegisql.id_builder;
 
 import java.util.Date;
 
-public class SplittedId {
+public class IdParts {
 	
 	private long timestamp;
 	private int  datacenterId;
 	private int  hostId;
 	private long currentId;
 	
-	public SplittedId(long timestamp, int datacenterId, int hostId,	long currentId) {
+	public IdParts(long timestamp, int datacenterId, int hostId,	long currentId) {
 		this.timestamp = timestamp;
 		this.datacenterId = datacenterId;
 		this.hostId = hostId;
@@ -71,7 +71,7 @@ public class SplittedId {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		SplittedId other = (SplittedId) obj;
+		IdParts other = (IdParts) obj;
 		if (currentId != other.currentId)
 			return false;
 		if (datacenterId != other.datacenterId)

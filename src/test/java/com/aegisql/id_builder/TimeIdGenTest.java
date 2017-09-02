@@ -78,7 +78,7 @@ public class TimeIdGenTest {
 			next = ig1.getId();
 		}
 			
-		SplittedId id = TimeBasedIdGenerator.split_10x4x5(next);
+		IdParts id = TimeBasedIdGenerator.split_10x4x5(next);
 		assertEquals(id.getCurrentId(),12345);
 		assertEquals(id.getDatacenterId(),3);
 		assertEquals(id.getHostId(),123);
@@ -113,7 +113,7 @@ public class TimeIdGenTest {
 			Long next = ig1.getId();
 			assertFalse(ids.contains(next));
 			ids.add(next);
-			SplittedId s = TimeBasedIdGenerator.split_10x4x5(next);
+			IdParts s = TimeBasedIdGenerator.split_10x4x5(next);
 			max = Math.max(max, s.getCurrentId());
 			if( (i % 50000) == 0 ){
 				System.out.println("4: id["+i+"] = "+ s + " -- " + System.currentTimeMillis()/1000);
