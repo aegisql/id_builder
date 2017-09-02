@@ -120,11 +120,23 @@ public class TimeBasedIdGenerator implements IdSource {
 		idGen.setTimeTransformer(time -> time);
 		return idGen;
 	}
-
+	
 	public static TimeBasedIdGenerator idGenerator_10x4x5(int hostId) {
 		return idGenerator_10x4x5(hostId, System.currentTimeMillis() / 1000);
 	}
 
+	public static TimeBasedIdGenerator idGenerator_10x8(long startTimeStampSec) {
+		TimeBasedIdGenerator idGen = new TimeBasedIdGenerator(0, startTimeStampSec, 99999999, 9);
+		idGen.setTimeTransformer(time -> time);
+		return idGen;
+	}
+
+	public static TimeBasedIdGenerator idGenerator_10x8() {
+		TimeBasedIdGenerator idGen = new TimeBasedIdGenerator(0, System.currentTimeMillis()/1000, 99999999, 9);
+		idGen.setTimeTransformer(time -> time);
+		return idGen;
+	}
+	
 	public static IdParts split_10x4x5(final long id) {
 
 		long timestamp;
@@ -142,6 +154,16 @@ public class TimeBasedIdGenerator implements IdSource {
 		return idp;
 	}
 
+	public static IdParts split_10x8(final long id) {
+		long timestamp;
+		long currentId;
+		timestamp = id / 1000000000L;
+		currentId = id - timestamp * 1000000000L;
+		IdParts idp = new IdParts(timestamp, (int) 0, 0, currentId);
+		return idp;
+	}
+
+	
 	public void setTimestampSupplier(LongSupplier timestamp) {
 		this.timestamp = timestamp;
 	}
