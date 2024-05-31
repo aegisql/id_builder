@@ -8,6 +8,8 @@ import com.aegisql.id_builder.IdSource;
 import com.aegisql.id_builder.IdParts;
 import com.aegisql.id_builder.TimeTransformer;
 
+import static com.aegisql.id_builder.TimeTransformer.identity;
+
 // TODO: Auto-generated Javadoc
 /**
  * The Class TimeHostIdGenerator.
@@ -26,17 +28,17 @@ public class TimeHostIdGenerator implements IdSource {
 	/** The time id base. */
 	protected final long timeIdBase;
 
+	/** The max id per M sec. */
+	protected final long maxIdPerMSec;
+
 	/** The global counter. */
-	protected long globalCounter       = 0;
+	protected volatile long globalCounter       = 0;
 
 	/** The current id. */
 	protected long currentId           = 0;
 	
 	/** The current time stamp sec. */
 	protected long currentTimeStampSec = 0;
-	
-	/** The max id per M sec. */
-	protected final long maxIdPerMSec;
 
 	/** The sleep after. */
 	private long sleepAfter;
@@ -88,27 +90,29 @@ public class TimeHostIdGenerator implements IdSource {
 		long now   = nowMs / 1000;
 		long dt    = nowMs - (now * 1000);
 
-		globalCounter++;
 
 		if (now > currentTimeStampSec)
-			initNextSecondId(nowMs);
+			initNextSecondId(now);
 		else if (now == currentTimeStampSec)
 			currentSecondNextId(dt);
 		else
-			processShiftToPastTime(now, nowMs, dt);
+			processShiftToPastTime();
 
-		long returnId = currentId++;
+		globalCounter++;
+		return buildId(currentId++);
+	}
 
-		if (returnId > maxId)
-			throw new IdSourceException("Internal ID reached ultimate value: " + returnId);
-
-		return tf.transformTimestamp(currentTimeStampSec) * timeIdBase + hostId + returnId;
+	private long buildId(long id) {
+		if (id > maxId) {
+			throw new IdSourceException("Internal ID reached ultimate value: " + id);
+		}
+		return tf.transformTimestamp(currentTimeStampSec) * timeIdBase + hostId + id;
 	}
 
 	/**
 	 * Sleep one M sec.
 	 */
-	private void sleepOneMSec() {
+	private static void sleepOneMSec() {
 		try {
 			Thread.sleep(1);
 		} catch (InterruptedException e) {
@@ -128,7 +132,7 @@ public class TimeHostIdGenerator implements IdSource {
 			long nowMs = timestamp.getAsLong();
 			long now = nowMs / 1000;
 			if (now > currentTimeStampSec) {
-				initNextSecondId(nowMs);
+				initNextSecondId(now);
 			}
 		}
 	}
@@ -136,21 +140,18 @@ public class TimeHostIdGenerator implements IdSource {
 	/**
 	 * Inits the next second id.
 	 *
-	 * @param nowMs the now ms
+	 * @param now the now ms
 	 */
-	private void initNextSecondId(long nowMs) {
+	private void initNextSecondId(long now) {
 		currentId = 0;
-		currentTimeStampSec = nowMs / 1000;
+		currentTimeStampSec = now;
 	}
 
 	/**
 	 * Process shift to past time.
 	 *
-	 * @param currentTime the current time
-	 * @param currentTimeMs the current time ms
-	 * @param dt the dt
 	 */
-	private void processShiftToPastTime(long currentTime, long currentTimeMs, long dt) {
+	private void processShiftToPastTime() {
 		if (globalCounter % sleepAfter == 0) {
 			sleepOneMSec();
 		}
@@ -178,7 +179,7 @@ public class TimeHostIdGenerator implements IdSource {
 	 */
 	public static TimeHostIdGenerator idGenerator_10x4x5(int hostId, long startTimeStampSec) {
 		TimeHostIdGenerator idGen = new TimeHostIdGenerator(hostId, startTimeStampSec, 99999, 9999);
-		idGen.setTimeTransformer(time -> time);
+		idGen.setTimeTransformer(identity);
 		return idGen;
 	}
 	
@@ -200,7 +201,7 @@ public class TimeHostIdGenerator implements IdSource {
 	 */
 	public static TimeHostIdGenerator idGenerator_10x8(long startTimeStampSec) {
 		TimeHostIdGenerator idGen = new TimeHostIdGenerator(0, startTimeStampSec, 99999999, 9);
-		idGen.setTimeTransformer(time -> time);
+		idGen.setTimeTransformer(identity);
 		return idGen;
 	}
 
@@ -211,46 +212,8 @@ public class TimeHostIdGenerator implements IdSource {
 	 */
 	public static TimeHostIdGenerator idGenerator_10x8() {
 		TimeHostIdGenerator idGen = new TimeHostIdGenerator(0, System.currentTimeMillis()/1000, 99999999, 9);
-		idGen.setTimeTransformer(time -> time);
+		idGen.setTimeTransformer(identity);
 		return idGen;
-	}
-	
-	/**
-	 * Split 10 x 4 x 5.
-	 *
-	 * @param id the id
-	 * @return the id parts
-	 */
-	public static IdParts split_10x4x5(final long id) {
-
-		long timestamp;
-		long datacenterId;
-		long hostId;
-		long currentId;
-
-		timestamp = id / 1000000000;
-		long dcHostId = id - timestamp * 1000000000;
-		long dcHost = dcHostId / 100000;
-		currentId = dcHostId - dcHost * 100000;
-		datacenterId = dcHost / 1000;
-		hostId = dcHost - datacenterId * 1000;
-		IdParts idp = new IdParts(timestamp, (int) datacenterId, (int) hostId, currentId);
-		return idp;
-	}
-
-	/**
-	 * Split 10 x 8.
-	 *
-	 * @param id the id
-	 * @return the id parts
-	 */
-	public static IdParts split_10x8(final long id) {
-		long timestamp;
-		long currentId;
-		timestamp = id / 1000000000L;
-		currentId = id - timestamp * 1000000000L;
-		IdParts idp = new IdParts(timestamp, (int) 0, 0, currentId);
-		return idp;
 	}
 
 	

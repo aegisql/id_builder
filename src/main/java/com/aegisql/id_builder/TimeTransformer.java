@@ -12,5 +12,7 @@ public interface TimeTransformer {
 	 * @param currentTimeSec the current time sec
 	 * @return the long
 	 */
-	public long transformTimestamp( long currentTimeSec );
+	long transformTimestamp( long currentTimeSec );
+
+	TimeTransformer identity = time->time;
 }

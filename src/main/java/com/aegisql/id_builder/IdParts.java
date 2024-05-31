@@ -168,8 +168,45 @@ public class IdParts {
 		builder.append(currentId);
 		return builder.toString();
 	}
-	
-	
+
+	/**
+	 * Split 10 x 4 x 5.
+	 *
+	 * @param id the id
+	 * @return the id parts
+	 */
+	public static IdParts split_10x4x5(final long id) {
+
+		long timestamp;
+		long datacenterId;
+		long hostId;
+		long currentId;
+
+		timestamp = id / 1000000000;
+		long dcHostId = id - timestamp * 1000000000;
+		long dcHost = dcHostId / 100000;
+		currentId = dcHostId - dcHost * 100000;
+		datacenterId = dcHost / 1000;
+		hostId = dcHost - datacenterId * 1000;
+		IdParts idp = new IdParts(timestamp, (int) datacenterId, (int) hostId, currentId);
+		return idp;
+	}
+
+	/**
+	 * Split 10 x 8.
+	 *
+	 * @param id the id
+	 * @return the id parts
+	 */
+	public static IdParts split_10x8(final long id) {
+		long timestamp;
+		long currentId;
+		timestamp = id / 1000000000L;
+		currentId = id - timestamp * 1000000000L;
+		IdParts idp = new IdParts(timestamp, (int) 0, 0, currentId);
+		return idp;
+	}
+
 	
 	
 }

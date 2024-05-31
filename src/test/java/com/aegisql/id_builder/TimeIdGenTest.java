@@ -1,5 +1,7 @@
 package com.aegisql.id_builder;
 
+import static com.aegisql.id_builder.IdParts.split_10x4x5;
+import static com.aegisql.id_builder.IdParts.split_10x8;
 import static org.junit.Assert.*;
 
 import java.util.HashSet;
@@ -46,6 +48,7 @@ public class TimeIdGenTest {
 			}
 		}
 		System.out.println("last generated id = "+ next + " time = " + time + "-" + System.currentTimeMillis()/1000);
+		assertEquals(1000000,((TimeHostIdGenerator)ig1).getGlobalCounter());
 	}
 
 	@Test
@@ -78,7 +81,7 @@ public class TimeIdGenTest {
 			next = ig1.getId();
 		}
 			
-		IdParts id = TimeHostIdGenerator.split_10x4x5(next);
+		IdParts id = split_10x4x5(next);
 		assertEquals(id.getCurrentId(),12345);
 		assertEquals(id.getDatacenterId(),3);
 		assertEquals(id.getHostId(),123);
@@ -113,7 +116,7 @@ public class TimeIdGenTest {
 			Long next = ig1.getId();
 			assertFalse(ids.contains(next));
 			ids.add(next);
-			IdParts s = TimeHostIdGenerator.split_10x4x5(next);
+			IdParts s = split_10x4x5(next);
 			max = Math.max(max, s.getCurrentId());
 			if( (i % 50000) == 0 ){
 				System.out.println("4: id["+i+"] = "+ s + " -- " + System.currentTimeMillis()/1000);
@@ -134,7 +137,7 @@ public class TimeIdGenTest {
 			next = ig1.getId();
 			assertTrue((next != prev));
 			prev = next;
-			IdParts ip = TimeHostIdGenerator.split_10x8(next);
+			IdParts ip = split_10x8(next);
 			if( (i % 100000) == 0 ){
 				System.out.println("8: id["+i+"] = "+ ip + " -- " + System.currentTimeMillis()/1000);
 			}
@@ -168,7 +171,7 @@ public class TimeIdGenTest {
 			Long next = ig1.getId();
 			assertFalse(ids.contains(next));
 			ids.add(next);
-			IdParts s = TimeHostIdGenerator.split_10x8(next);
+			IdParts s = split_10x8(next);
 			max = Math.max(max, s.getCurrentId());
 			if( (i % 100000) == 0 ){
 				System.out.println("8s: id["+i+"] = "+ s + " -- " + System.currentTimeMillis()/1000);
