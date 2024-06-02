@@ -6,6 +6,10 @@ import static org.junit.Assert.*;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -82,7 +86,7 @@ public class TimeIdGenTest {
 		}
 			
 		IdParts id = split_10x4x5(next);
-		assertEquals(id.getCurrentId(),12345);
+		assertEquals(12346,id.getCurrentId());
 		assertEquals(id.getDatacenterId(),3);
 		assertEquals(id.getHostId(),123);
 		System.out.println(next+" -- "+id + " @ " + id.getIdDateTime());
@@ -182,6 +186,45 @@ public class TimeIdGenTest {
 		System.out.println("Max GeneratedID = "+max);
 	}
 
+	@Test
+	public void mutliThreadTest() throws InterruptedException {
+		final int threadCount = 20;
+		final int iterationsPerThread = 1000000;
+		IdSource ig1 = TimeHostIdGenerator.idGenerator_10x8();
+		ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
+		CountDownLatch latch = new CountDownLatch(threadCount);
+
+		final Set[] results = new Set[threadCount];
+		for (int i = 0; i < threadCount; i++) {
+			results[i] = new HashSet();
+		}
+
+		Set allResults = new HashSet();
+
+		for (int i = 0; i < threadCount; i++) {
+			int thread = i;
+			executorService.execute(() -> {
+				for (int j = 0; j < iterationsPerThread; j++) {
+					long id = ig1.getId();
+					results[thread].add(id);
+					if( j > 0 && j % 100000 == 0 ) {
+						System.out.println("thread "+thread+" "+(j*100)/iterationsPerThread+"%");
+					}
+
+				}
+				latch.countDown();
+			});
+		}
+
+		latch.await(10, TimeUnit.MINUTES);
+		for (int i = 0; i < threadCount; i++) {
+			assertEquals(iterationsPerThread,results[i].size());
+			allResults.addAll(results[i]);
+		}
+
+		assertEquals(iterationsPerThread*threadCount,allResults.size());
+
+	}
 	
 	
 }

@@ -2,6 +2,8 @@ package com.aegisql.id_builder.impl;
 
 import com.aegisql.id_builder.IdSourceException;
 
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.LongSupplier;
 
 import com.aegisql.id_builder.IdSource;
@@ -15,6 +17,27 @@ import static com.aegisql.id_builder.TimeTransformer.identity;
  * The Class TimeHostIdGenerator.
  */
 public class TimeHostIdGenerator implements IdSource {
+
+	private class IdState {
+		/** The global counter. */
+		final long globalCounter;
+		/** The current id. */
+		final long currentId;
+		/** The current time stamp sec. */
+		final long currentTimeStampSec;
+
+		public IdState(long globalCounter, long currentId, long currentTimeStampSec) {
+            this.globalCounter = globalCounter;
+            this.currentId = currentId;
+            this.currentTimeStampSec = currentTimeStampSec;
+        }
+
+		@Override
+		public boolean equals(Object o) {
+			IdState idState = (IdState) o;
+			return globalCounter == idState.globalCounter;
+		}
+	}
 
 	/** The max id. */
 	protected final int maxId;
@@ -31,15 +54,6 @@ public class TimeHostIdGenerator implements IdSource {
 	/** The max id per M sec. */
 	protected final long maxIdPerMSec;
 
-	/** The global counter. */
-	protected volatile long globalCounter       = 0;
-
-	/** The current id. */
-	protected long currentId           = 0;
-	
-	/** The current time stamp sec. */
-	protected long currentTimeStampSec = 0;
-
 	/** The sleep after. */
 	private long sleepAfter;
 
@@ -48,6 +62,8 @@ public class TimeHostIdGenerator implements IdSource {
 
 	/** The timestamp. */
 	private LongSupplier timestamp = System::currentTimeMillis;
+
+	private final AtomicReference<IdState> idStateRef = new AtomicReference<>();
 
 	/**
 	 * Instantiates a new time host id generator.
@@ -60,20 +76,21 @@ public class TimeHostIdGenerator implements IdSource {
 	private TimeHostIdGenerator(int hostId, long startTimeStampSec, int maxId, int maxHostId) {
 		this.maxId               = maxId;
 		this.maxHostId           = maxHostId;
-		this.currentTimeStampSec = startTimeStampSec;
 
 		if (hostId > maxHostId) {
-			throw new IdSourceException("Max host ID > " + maxHostId);
+			throw new IdSourceException("Host ID > " + maxHostId);
 		}
 
 		this.hostId       = hostId * (maxId + 1);
 		this.timeIdBase   = (maxHostId + 1) * (maxId + 1);
 		this.maxIdPerMSec = (maxId + 1) / 1000;
 		this.setPastShiftSlowDown(1.2);
+		this.idStateRef.set(new IdState(0,0,startTimeStampSec));
 	}
 
 	/**
-	 * Sets the past shift slow down.
+	 * Sets the past shift slow down ratio.
+	 * Default 1.2 which creates approximately 20% slow down
 	 *
 	 * @param x the new past shift slow down
 	 */
@@ -85,28 +102,45 @@ public class TimeHostIdGenerator implements IdSource {
 	 * @see com.aegisql.id_builder.IdSource#getId()
 	 */
 	@Override
-	public final synchronized long getId() {
+	public final long getId() {
+		while (true) {
+			IdState expectedState = idStateRef.get();
+			IdState newState = nextState(expectedState);
+			if( idStateRef.compareAndSet(expectedState,newState)) {
+				return buildId(newState);
+            }
+		}
+	}
+
+	private IdState nextState(IdState current) {
 		long nowMs = timestamp.getAsLong();
 		long now   = nowMs / 1000;
 		long dt    = nowMs - (now * 1000);
-
-
-		if (now > currentTimeStampSec)
-			initNextSecondId(now);
-		else if (now == currentTimeStampSec)
-			currentSecondNextId(dt);
-		else
-			processShiftToPastTime();
-
-		globalCounter++;
-		return buildId(currentId++);
+		long nextCounter = current.globalCounter+1;
+		if(now > current.currentTimeStampSec) {
+			return new IdState(nextCounter,0,now);
+		} else if(now == current.currentTimeStampSec) {
+			long maxPredictedId = Math.min(maxId, dt * maxIdPerMSec);
+			if (current.currentId >= maxPredictedId) {
+				sleepOneMSec();
+				return nextState(current);
+			} else {
+				return new IdState(nextCounter,current.currentId+1,now);
+			}
+		} else {
+			if (nextCounter % sleepAfter == 0) {
+				sleepOneMSec();
+			}
+			if (current.currentId >= maxId) {
+				return new IdState(nextCounter,0,current.currentTimeStampSec+1);
+			} else {
+				return new IdState(nextCounter,current.currentId+1,current.currentTimeStampSec);
+			}
+		}
 	}
 
-	private long buildId(long id) {
-		if (id > maxId) {
-			throw new IdSourceException("Internal ID reached ultimate value: " + id);
-		}
-		return tf.transformTimestamp(currentTimeStampSec) * timeIdBase + hostId + id;
+	private long buildId(IdState idState) {
+		return tf.transformTimestamp(idState.currentTimeStampSec) * timeIdBase + hostId + idState.currentId;
 	}
 
 	/**
@@ -117,47 +151,6 @@ public class TimeHostIdGenerator implements IdSource {
 			Thread.sleep(1);
 		} catch (InterruptedException e) {
 			throw new IdSourceException("Unexpected Interruption", e);
-		}
-	}
-
-	/**
-	 * Current second next id.
-	 *
-	 * @param dt the dt
-	 */
-	private void currentSecondNextId(long dt) {
-		long maxPredictedId = Math.min(maxId, dt * maxIdPerMSec);
-		if (currentId >= maxPredictedId) {
-			sleepOneMSec();
-			long nowMs = timestamp.getAsLong();
-			long now = nowMs / 1000;
-			if (now > currentTimeStampSec) {
-				initNextSecondId(now);
-			}
-		}
-	}
-
-	/**
-	 * Inits the next second id.
-	 *
-	 * @param now the now ms
-	 */
-	private void initNextSecondId(long now) {
-		currentId = 0;
-		currentTimeStampSec = now;
-	}
-
-	/**
-	 * Process shift to past time.
-	 *
-	 */
-	private void processShiftToPastTime() {
-		if (globalCounter % sleepAfter == 0) {
-			sleepOneMSec();
-		}
-		if (currentId >= maxId) {
-			currentId = 0;
-			currentTimeStampSec++; // add one second to current timestamp
 		}
 	}
 
@@ -232,7 +225,7 @@ public class TimeHostIdGenerator implements IdSource {
 	 * @return the global counter
 	 */
 	public long getGlobalCounter() {
-		return globalCounter;
+		return idStateRef.get().globalCounter;
 	}
 
 }
