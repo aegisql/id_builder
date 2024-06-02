@@ -13,19 +13,33 @@ import com.aegisql.id_builder.TimeTransformer;
 import static com.aegisql.id_builder.TimeTransformer.identity;
 
 // TODO: Auto-generated Javadoc
+
 /**
  * The Class TimeHostIdGenerator.
  */
 public class TimeHostIdGenerator implements IdSource {
 
 	private class IdState {
-		/** The global counter. */
+		/**
+		 * The global counter.
+		 */
 		final long globalCounter;
-		/** The current id. */
+		/**
+		 * The current id.
+		 */
 		final long currentId;
-		/** The current time stamp sec. */
+		/**
+		 * The current time stamp sec.
+		 */
 		final long currentTimeStampSec;
 
+		/**
+		 * Instantiates a new Id state.
+		 *
+		 * @param globalCounter       the global counter
+		 * @param currentId           the current id
+		 * @param currentTimeStampSec the current time stamp sec
+		 */
 		public IdState(long globalCounter, long currentId, long currentTimeStampSec) {
             this.globalCounter = globalCounter;
             this.currentId = currentId;
@@ -39,19 +53,29 @@ public class TimeHostIdGenerator implements IdSource {
 		}
 	}
 
-	/** The max id. */
+	/**
+	 * The max id.
+	 */
 	protected final int maxId;
-	
-	/** The max host id. */
+
+	/**
+	 * The max host id.
+	 */
 	protected final int maxHostId;
-	
-	/** The host id. */
+
+	/**
+	 * The host id.
+	 */
 	protected final long hostId;
-	
-	/** The time id base. */
+
+	/**
+	 * The time id base.
+	 */
 	protected final long timeIdBase;
 
-	/** The max id per M sec. */
+	/**
+	 * The max id per M sec.
+	 */
 	protected final long maxIdPerMSec;
 
 	/** The sleep after. */
@@ -167,7 +191,7 @@ public class TimeHostIdGenerator implements IdSource {
 	/**
 	 * Id generator 10 x 4 x 5.
 	 *
-	 * @param hostId the host id
+	 * @param hostId            the host id
 	 * @param startTimeStampSec the start time stamp sec
 	 * @return the time host id generator
 	 */
@@ -176,7 +200,7 @@ public class TimeHostIdGenerator implements IdSource {
 		idGen.setTimeTransformer(identity);
 		return idGen;
 	}
-	
+
 	/**
 	 * Id generator 10 x 4 x 5.
 	 *
@@ -210,7 +234,7 @@ public class TimeHostIdGenerator implements IdSource {
 		return idGen;
 	}
 
-	
+
 	/**
 	 * Sets the timestamp supplier.
 	 *
