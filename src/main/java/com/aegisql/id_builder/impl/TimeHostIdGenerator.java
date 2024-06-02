@@ -140,6 +140,7 @@ public class TimeHostIdGenerator implements IdSource {
 	}
 
 	private long buildId(IdState idState) {
+		assert idState.currentId <= maxId : "current ID exceeded max id";
 		return tf.transformTimestamp(idState.currentTimeStampSec) * timeIdBase + hostId + idState.currentId;
 	}
 
