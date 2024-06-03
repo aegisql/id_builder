@@ -225,6 +225,4 @@ public class TimeIdGenTest {
 		assertEquals(iterationsPerThread*threadCount,allResults.size());
 
 	}
-	
-	
 }

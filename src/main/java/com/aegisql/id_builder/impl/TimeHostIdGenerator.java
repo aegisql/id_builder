@@ -58,10 +58,6 @@ public class TimeHostIdGenerator implements IdSource {
 	 */
 	protected final int maxId;
 
-	/**
-	 * The max host id.
-	 */
-	protected final int maxHostId;
 
 	/**
 	 * The host id.
@@ -82,7 +78,7 @@ public class TimeHostIdGenerator implements IdSource {
 	private long sleepAfter;
 
 	/** The tf. */
-	private TimeTransformer tf;
+	private TimeTransformer tf = identity;
 
 	/** The timestamp. */
 	private LongSupplier timestamp = System::currentTimeMillis;
@@ -94,20 +90,21 @@ public class TimeHostIdGenerator implements IdSource {
 	 *
 	 * @param hostId the host id
 	 * @param startTimeStampSec the start time stamp sec
-	 * @param maxId the max id
-	 * @param maxHostId the max host id
+	 * @param idPos the max id
+	 * @param hostIdPos the max host id
 	 */
-	private TimeHostIdGenerator(int hostId, long startTimeStampSec, int maxId, int maxHostId) {
-		this.maxId               = maxId;
-		this.maxHostId           = maxHostId;
+	public TimeHostIdGenerator(int hostId, long startTimeStampSec, int idPos, int hostIdPos) {
+		int maxIdValue = (int) Math.round(Math.pow(10, idPos));
+		int maxHostId  = (int) Math.round(Math.pow(10,hostIdPos));
+		this.maxId     = maxIdValue-1;
 
 		if (hostId > maxHostId) {
 			throw new IdSourceException("Host ID > " + maxHostId);
 		}
 
-		this.hostId       = hostId * (maxId + 1);
-		this.timeIdBase   = (maxHostId + 1) * (maxId + 1);
-		this.maxIdPerMSec = (maxId + 1) / 1000;
+		this.hostId       = hostId * (maxIdValue);
+		this.timeIdBase   = maxHostId * maxIdValue;
+		this.maxIdPerMSec = maxIdValue / 1000;
 		this.setPastShiftSlowDown(1.2);
 		this.idStateRef.set(new IdState(0,0,startTimeStampSec));
 	}
@@ -196,9 +193,7 @@ public class TimeHostIdGenerator implements IdSource {
 	 * @return the time host id generator
 	 */
 	public static TimeHostIdGenerator idGenerator_10x4x5(int hostId, long startTimeStampSec) {
-		TimeHostIdGenerator idGen = new TimeHostIdGenerator(hostId, startTimeStampSec, 99999, 9999);
-		idGen.setTimeTransformer(identity);
-		return idGen;
+		return new TimeHostIdGenerator(hostId, startTimeStampSec, 5, 4);
 	}
 
 	/**
@@ -218,9 +213,7 @@ public class TimeHostIdGenerator implements IdSource {
 	 * @return the time host id generator
 	 */
 	public static TimeHostIdGenerator idGenerator_10x8(long startTimeStampSec) {
-		TimeHostIdGenerator idGen = new TimeHostIdGenerator(0, startTimeStampSec, 99999999, 9);
-		idGen.setTimeTransformer(identity);
-		return idGen;
+		return new TimeHostIdGenerator(0, startTimeStampSec, 8, 1);
 	}
 
 	/**
@@ -229,9 +222,7 @@ public class TimeHostIdGenerator implements IdSource {
 	 * @return the time host id generator
 	 */
 	public static TimeHostIdGenerator idGenerator_10x8() {
-		TimeHostIdGenerator idGen = new TimeHostIdGenerator(0, System.currentTimeMillis()/1000, 99999999, 9);
-		idGen.setTimeTransformer(identity);
-		return idGen;
+		return idGenerator_10x8(System.currentTimeMillis()/1000);
 	}
 
 
