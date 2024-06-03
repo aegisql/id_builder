@@ -21,22 +21,6 @@ import com.aegisql.id_builder.impl.TimeHostIdGenerator;
 
 public class TimeIdGenTest {
 
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-	}
-
-	@AfterClass
-	public static void tearDownAfterClass() throws Exception {
-	}
-
-	@Before
-	public void setUp() throws Exception {
-	}
-
-	@After
-	public void tearDown() throws Exception {
-	}
-
 	@Test
 	public void testWithConstructor() throws InterruptedException {
 		final long timeBase = System.currentTimeMillis() / 1000 - 1;
@@ -99,9 +83,10 @@ public class TimeIdGenTest {
 		}
 			
 		IdParts id = split_10x4x5(next);
-		assertEquals(12346,id.getCurrentId());
-		assertEquals(id.getDatacenterId(),3);
-		assertEquals(id.getHostId(),123);
+		assertEquals(time,id.timestamp());
+		assertEquals(12346,id.currentId());
+		assertEquals(id.datacenterId(),3);
+		assertEquals(id.hostId(),123);
 		System.out.println(next+" -- "+id + " @ " + id.getIdDateTime());
 
 	}
@@ -134,7 +119,7 @@ public class TimeIdGenTest {
 			assertFalse(ids.contains(next));
 			ids.add(next);
 			IdParts s = split_10x4x5(next);
-			max = Math.max(max, s.getCurrentId());
+			max = Math.max(max, s.currentId());
 			if( (i % 50000) == 0 ){
 				System.out.println("4: id["+i+"] = "+ s + " -- " + System.currentTimeMillis()/1000);
 //				Thread.sleep(400);
@@ -189,7 +174,7 @@ public class TimeIdGenTest {
 			assertFalse(ids.contains(next));
 			ids.add(next);
 			IdParts s = split_10x8(next);
-			max = Math.max(max, s.getCurrentId());
+			max = Math.max(max, s.currentId());
 			if( (i % 100000) == 0 ){
 				System.out.println("8s: id["+i+"] = "+ s + " -- " + System.currentTimeMillis()/1000);
 				Thread.sleep(1);

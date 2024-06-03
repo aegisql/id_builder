@@ -3,119 +3,72 @@ package com.aegisql.id_builder;
 import java.util.Date;
 
 // TODO: Auto-generated Javadoc
+
 /**
- * The Class IdParts.
+ * The type Id parts.
  */
-public class IdParts {
-	
-	/** The timestamp. */
-	private long timestamp;
-	
-	/** The datacenter id. */
-	private int  datacenterId;
-	
-	/** The host id. */
-	private int  hostId;
-	
-	/** The current id. */
-	private long currentId;
-	
+public record IdParts(long timestamp, int datacenterId, int hostId, long currentId) {
+
 	/**
-	 * Instantiates a new id parts.
+	 * Instantiates a new Id parts.
 	 *
-	 * @param timestamp the timestamp
+	 * @param timestamp    the timestamp
 	 * @param datacenterId the datacenter id
-	 * @param hostId the host id
-	 * @param currentId the current id
+	 * @param hostId       the host id
+	 * @param currentId    the current id
 	 */
-	public IdParts(long timestamp, int datacenterId, int hostId,	long currentId) {
-		this.timestamp = timestamp;
-		this.datacenterId = datacenterId;
-		this.hostId = hostId;
-		this.currentId = currentId;
+	public IdParts {
 	}
 
 	/**
-	 * Gets the timestamp.
+	 * Timestamp long.
 	 *
-	 * @return the timestamp
+	 * @return the long
 	 */
-	public long getTimestamp() {
+	@Override
+	public long timestamp() {
 		return timestamp;
 	}
 
 	/**
-	 * Sets the timestamp.
+	 * Datacenter id int.
 	 *
-	 * @param timestamp the new timestamp
+	 * @return the int
 	 */
-	public void setTimestamp(long timestamp) {
-		this.timestamp = timestamp;
-	}
-
-	/**
-	 * Gets the datacenter id.
-	 *
-	 * @return the datacenter id
-	 */
-	public int getDatacenterId() {
+	@Override
+	public int datacenterId() {
 		return datacenterId;
 	}
 
 	/**
-	 * Sets the datacenter id.
+	 * Host id int.
 	 *
-	 * @param datacenterId the new datacenter id
+	 * @return the int
 	 */
-	public void setDatacenterId(int datacenterId) {
-		this.datacenterId = datacenterId;
-	}
-
-	/**
-	 * Gets the host id.
-	 *
-	 * @return the host id
-	 */
-	public int getHostId() {
+	@Override
+	public int hostId() {
 		return hostId;
 	}
 
 	/**
-	 * Sets the host id.
+	 * Current id long.
 	 *
-	 * @param hostId the new host id
+	 * @return the long
 	 */
-	public void setHostId(int hostId) {
-		this.hostId = hostId;
-	}
-
-	/**
-	 * Gets the current id.
-	 *
-	 * @return the current id
-	 */
-	public long getCurrentId() {
+	@Override
+	public long currentId() {
 		return currentId;
 	}
 
 	/**
-	 * Sets the current id.
-	 *
-	 * @param currentId the new current id
-	 */
-	public void setCurrentId(long currentId) {
-		this.currentId = currentId;
-	}
-
-	/**
-	 * Gets the id date time.
+	 * Gets id date time.
 	 *
 	 * @return the id date time
 	 */
 	public Date getIdDateTime() {
-		return new Date( timestamp * 1000 );
+		return new Date(timestamp * 1000);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see java.lang.Object#hashCode()
 	 */
@@ -148,25 +101,25 @@ public class IdParts {
 			return false;
 		if (hostId != other.hostId)
 			return false;
-        return timestamp == other.timestamp;
-    }
+		return timestamp == other.timestamp;
+	}
 
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
-        return timestamp +
-                "." +
-                datacenterId +
-                "." +
-                hostId +
-                "." +
-                currentId;
+		return timestamp +
+				"." +
+				datacenterId +
+				"." +
+				hostId +
+				"." +
+				currentId;
 	}
 
 	/**
-	 * Split 10 x 4 x 5.
+	 * Split 10 x 4 x 5 id parts.
 	 *
 	 * @param id the id
 	 * @return the id parts
@@ -184,11 +137,11 @@ public class IdParts {
 		currentId = dcHostId - dcHost * 100000;
 		datacenterId = dcHost / 1000;
 		hostId = dcHost - datacenterId * 1000;
-        return new IdParts(timestamp, (int) datacenterId, (int) hostId, currentId);
+		return new IdParts(timestamp, (int) datacenterId, (int) hostId, currentId);
 	}
 
 	/**
-	 * Split 10 x 8.
+	 * Split 10 x 8 id parts.
 	 *
 	 * @param id the id
 	 * @return the id parts
@@ -198,9 +151,8 @@ public class IdParts {
 		long currentId;
 		timestamp = id / 1000000000L;
 		currentId = id - timestamp * 1000000000L;
-        return new IdParts(timestamp, 0, 0, currentId);
+		return new IdParts(timestamp, 0, 0, currentId);
 	}
 
-	
-	
+
 }
