@@ -38,6 +38,19 @@ public class TimeIdGenTest {
 	}
 
 	@Test
+	public void testWithConstructor() throws InterruptedException {
+		final long timeBase = System.currentTimeMillis() / 1000 - 1;
+		TimeHostIdGenerator ig1 = new TimeHostIdGenerator(1001,6,4);
+		ig1.setTimeTransformer(t -> t - timeBase);
+		for (int i = 0; i < 10; i++) {
+			long id = ig1.getId();
+			System.out.println(id);
+			Thread.sleep(300);
+			assertTrue(id < 100000000000L);
+		}
+	}
+
+	@Test
 	public void test1() {
 		long time = System.currentTimeMillis()/1000;
 		IdSource ig1 = TimeHostIdGenerator.idGenerator_10x4x5(1001,time);
