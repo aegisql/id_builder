@@ -11,10 +11,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.aegisql.id_builder.impl.TimeHostIdGenerator;
@@ -37,7 +33,7 @@ public class TimeIdGenTest {
 	@Test
 	public void test1() {
 		long time = System.currentTimeMillis()/1000;
-		IdSource ig1 = TimeHostIdGenerator.idGenerator_10x4x5(1001,time);
+		TimeHostIdGenerator ig1 = TimeHostIdGenerator.idGenerator_10x4x5(1001,time);
 		long prev = 0;
 		long next = 0;
 		for( int i = 1; i < 1000001; i++ ) {
@@ -49,15 +45,15 @@ public class TimeIdGenTest {
 			}
 		}
 		System.out.println("last generated id = "+ next + " time = " + time + "-" + System.currentTimeMillis()/1000);
-		assertEquals(1000000,((TimeHostIdGenerator)ig1).getGlobalCounter());
+		assertEquals(1000000, ig1.getGlobalCounter());
 	}
 
 	@Test
-	public void test2() throws InterruptedException {
+	public void test2() {
 		long time = System.currentTimeMillis()/1000;
-		IdSource ig1 = TimeHostIdGenerator.idGenerator_10x4x5(1001,5+(System.currentTimeMillis()/1000));
+		TimeHostIdGenerator ig1 = TimeHostIdGenerator.idGenerator_10x4x5(1001,5+(System.currentTimeMillis()/1000));
 		
-		((TimeHostIdGenerator)ig1).setPastShiftSlowDown(1.5);
+		ig1.setPastShiftSlowDown(1.5);
 		
 		long prev = 0;
 		long next = 0;
@@ -74,7 +70,7 @@ public class TimeIdGenTest {
 
 
 	@Test
-	public void test3() throws InterruptedException {
+	public void test3() {
 		long time = System.currentTimeMillis()/1000;
 		IdSource ig1 = TimeHostIdGenerator.idGenerator_10x4x5( 3123 );
 		long next = 0;
@@ -93,18 +89,17 @@ public class TimeIdGenTest {
 
 	
 	@Test
-	public void test4() throws InterruptedException {
-		long time = System.currentTimeMillis()/1000;
-		IdSource ig1 = TimeHostIdGenerator.idGenerator_10x4x5(1001);
+	public void test4() {
+		TimeHostIdGenerator ig1 = TimeHostIdGenerator.idGenerator_10x4x5(1001);
 		
-		((TimeHostIdGenerator)ig1).setPastShiftSlowDown(1.25);
+		ig1.setPastShiftSlowDown(1.25);
 		
 		Set<Long> ids = new HashSet<>();
 		
 		final long now = System.currentTimeMillis();
 		final long delay = 3000;
 		
-		((TimeHostIdGenerator)ig1).setTimestampSupplier(()->{
+		ig1.setTimestampSupplier(()->{
 			long timestamp = System.currentTimeMillis();
 			if(timestamp - now < delay) {
 				return timestamp;
@@ -122,7 +117,6 @@ public class TimeIdGenTest {
 			max = Math.max(max, s.currentId());
 			if( (i % 50000) == 0 ){
 				System.out.println("4: id["+i+"] = "+ s + " -- " + System.currentTimeMillis()/1000);
-//				Thread.sleep(400);
 			}
 		}
 		assertEquals(1000000, ids.size());
@@ -149,17 +143,16 @@ public class TimeIdGenTest {
 
 	@Test
 	public void test8slow() throws InterruptedException {
-		long time = System.currentTimeMillis()/1000;
-		IdSource ig1 = TimeHostIdGenerator.idGenerator_10x8();
+		TimeHostIdGenerator ig1 = TimeHostIdGenerator.idGenerator_10x8();
 		
-		((TimeHostIdGenerator)ig1).setPastShiftSlowDown(1.1);
+		ig1.setPastShiftSlowDown(1.1);
 		
 		Set<Long> ids = new HashSet<>(10000001);
 		
 		final long now = System.currentTimeMillis();
 		final long delay = 500;
 		
-		((TimeHostIdGenerator)ig1).setTimestampSupplier(()->{
+		ig1.setTimestampSupplier(()->{
 			long timestamp = System.currentTimeMillis();
 			if(timestamp - now < delay) {
 				return timestamp;
@@ -184,7 +177,8 @@ public class TimeIdGenTest {
 		System.out.println("Max GeneratedID = "+max);
 	}
 
-	@Test
+	@SuppressWarnings("unchecked")
+    @Test
 	public void mutliThreadTest() throws InterruptedException {
 		final int threadCount = 20;
 		final int iterationsPerThread = 1000000;
@@ -192,12 +186,12 @@ public class TimeIdGenTest {
 		ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
 		CountDownLatch latch = new CountDownLatch(threadCount);
 
-		final Set[] results = new Set[threadCount];
+		final Set<Long>[] results = new Set[threadCount];
 		for (int i = 0; i < threadCount; i++) {
-			results[i] = new HashSet();
+			results[i] = new HashSet<>();
 		}
 
-		Set allResults = new HashSet();
+		Set<Long> allResults = new HashSet<>();
 
 		for (int i = 0; i < threadCount; i++) {
 			int thread = i;
@@ -214,7 +208,8 @@ public class TimeIdGenTest {
 			});
 		}
 
-		latch.await(10, TimeUnit.MINUTES);
+		boolean await = latch.await(10, TimeUnit.MINUTES);
+		assertTrue(await);
 		for (int i = 0; i < threadCount; i++) {
 			assertEquals(iterationsPerThread,results[i].size());
 			allResults.addAll(results[i]);
