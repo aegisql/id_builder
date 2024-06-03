@@ -123,10 +123,10 @@ public class IdParts {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + (int) (currentId ^ (currentId >>> 32));
+		result = prime * result + Long.hashCode(currentId);
 		result = prime * result + datacenterId;
 		result = prime * result + hostId;
-		result = prime * result + (int) (timestamp ^ (timestamp >>> 32));
+		result = prime * result + Long.hashCode(timestamp);
 		return result;
 	}
 
@@ -148,25 +148,21 @@ public class IdParts {
 			return false;
 		if (hostId != other.hostId)
 			return false;
-		if (timestamp != other.timestamp)
-			return false;
-		return true;
-	}
+        return timestamp == other.timestamp;
+    }
 
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append(timestamp);
-		builder.append(".");
-		builder.append(datacenterId);
-		builder.append(".");
-		builder.append(hostId);
-		builder.append(".");
-		builder.append(currentId);
-		return builder.toString();
+        return timestamp +
+                "." +
+                datacenterId +
+                "." +
+                hostId +
+                "." +
+                currentId;
 	}
 
 	/**
@@ -188,8 +184,7 @@ public class IdParts {
 		currentId = dcHostId - dcHost * 100000;
 		datacenterId = dcHost / 1000;
 		hostId = dcHost - datacenterId * 1000;
-		IdParts idp = new IdParts(timestamp, (int) datacenterId, (int) hostId, currentId);
-		return idp;
+        return new IdParts(timestamp, (int) datacenterId, (int) hostId, currentId);
 	}
 
 	/**
@@ -203,8 +198,7 @@ public class IdParts {
 		long currentId;
 		timestamp = id / 1000000000L;
 		currentId = id - timestamp * 1000000000L;
-		IdParts idp = new IdParts(timestamp, (int) 0, 0, currentId);
-		return idp;
+        return new IdParts(timestamp, 0, 0, currentId);
 	}
 
 	

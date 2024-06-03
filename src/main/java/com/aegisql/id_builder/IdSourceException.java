@@ -25,7 +25,4 @@ public class IdSourceException extends RuntimeException {
 		super(message, cause);
 	}
 
-	/** The Constant serialVersionUID. */
-	private static final long serialVersionUID = 1L;
-
 }
