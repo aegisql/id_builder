@@ -10,6 +10,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 import org.junit.Test;
 
@@ -218,4 +219,11 @@ public class TimeIdGenTest {
 		assertEquals(iterationsPerThread*threadCount,allResults.size());
 
 	}
+
+	@Test
+	public void testStream() {
+		Stream<Long> stream = TimeHostIdGenerator.idGenerator_10x4x5(1001).asStream();
+		stream.limit(10).forEach(System.out::println);
+	}
+
 }

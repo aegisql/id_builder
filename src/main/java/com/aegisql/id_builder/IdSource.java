@@ -1,6 +1,9 @@
 package com.aegisql.id_builder;
 
 // TODO: Auto-generated Javadoc
+
+import java.util.stream.Stream;
+
 /**
  * The Interface IdSource.
  */
@@ -11,5 +14,6 @@ public interface IdSource {
 	 *
 	 * @return the id
 	 */
-	public long getId();
+	long getId();
+	Stream<Long> asStream();
 }

@@ -4,6 +4,7 @@ import com.aegisql.id_builder.IdSourceException;
 
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.LongSupplier;
+import java.util.stream.Stream;
 
 import com.aegisql.id_builder.IdSource;
 import com.aegisql.id_builder.TimeTransformer;
@@ -16,9 +17,7 @@ import static com.aegisql.id_builder.TimeTransformer.identity;
 public final class TimeHostIdGenerator implements IdSource {
 
 	private record IdState(long globalCounter, long currentId, long currentTimeStampSec) {
-		private IdState {
-		}
-			@SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
+        @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
 			@Override
 			public boolean equals(Object o) {
 				IdState idState = (IdState) o;
@@ -95,7 +94,7 @@ public final class TimeHostIdGenerator implements IdSource {
 	 * @see com.aegisql.id_builder.IdSource#getId()
 	 */
 	@Override
-	public final long getId() {
+	public long getId() {
 		while (true) {
 			IdState expectedState = idStateRef.get();
 			IdState newState = nextState(expectedState);
@@ -103,6 +102,11 @@ public final class TimeHostIdGenerator implements IdSource {
 				return buildId(newState);
             }
 		}
+	}
+
+	@Override
+	public Stream<Long> asStream() {
+		return Stream.generate(this::getId);
 	}
 
 	private IdState nextState(IdState current) {
