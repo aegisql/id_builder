@@ -4,7 +4,6 @@ import com.aegisql.id_builder.IdSourceException;
 
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.LongSupplier;
-import java.util.stream.Stream;
 
 import com.aegisql.id_builder.IdSource;
 import com.aegisql.id_builder.TimeTransformer;
@@ -102,11 +101,6 @@ public final class TimeHostIdGenerator implements IdSource {
 				return buildId(newState);
             }
 		}
-	}
-
-	@Override
-	public Stream<Long> asStream() {
-		return Stream.generate(this::getId);
 	}
 
 	private IdState nextState(IdState current) {
