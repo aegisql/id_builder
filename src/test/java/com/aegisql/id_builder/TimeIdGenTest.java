@@ -14,14 +14,14 @@ import java.util.stream.LongStream;
 
 import org.junit.Test;
 
-import com.aegisql.id_builder.impl.TimeHostIdGenerator;
+import com.aegisql.id_builder.impl.DecimalIdGenerator;
 
 public class TimeIdGenTest {
 
 	@Test
 	public void testWithConstructor() throws InterruptedException {
 		final long timeBase = System.currentTimeMillis() / 1000 - 1;
-		TimeHostIdGenerator ig1 = new TimeHostIdGenerator(1001,6,4);
+		DecimalIdGenerator ig1 = new DecimalIdGenerator(1001,6,4);
 		ig1.setTimeTransformer(t -> t - timeBase);
 		for (int i = 0; i < 10; i++) {
 			long id = ig1.getId();
@@ -34,7 +34,7 @@ public class TimeIdGenTest {
 	@Test
 	public void test1() {
 		long time = System.currentTimeMillis()/1000;
-		TimeHostIdGenerator ig1 = TimeHostIdGenerator.idGenerator_10x4x5(1001,time);
+		DecimalIdGenerator ig1 = DecimalIdGenerator.idGenerator_10x4x5(1001,time);
 		long prev = 0;
 		long next = 0;
 		for( int i = 1; i < 1000001; i++ ) {
@@ -52,7 +52,7 @@ public class TimeIdGenTest {
 	@Test
 	public void test2() {
 		long time = System.currentTimeMillis()/1000;
-		TimeHostIdGenerator ig1 = TimeHostIdGenerator.idGenerator_10x4x5(1001,5+(System.currentTimeMillis()/1000));
+		DecimalIdGenerator ig1 = DecimalIdGenerator.idGenerator_10x4x5(1001,5+(System.currentTimeMillis()/1000));
 		
 		ig1.setPastShiftSlowDown(1.5);
 		
@@ -73,13 +73,16 @@ public class TimeIdGenTest {
 	@Test
 	public void test3() {
 		long time = System.currentTimeMillis()/1000;
-		IdSource ig1 = TimeHostIdGenerator.idGenerator_10x4x5( 3123 );
+		IdSource ig1 = DecimalIdGenerator.idGenerator_10x4x5( 3123 );
+		System.out.println(ig1);
 		long next = 0;
 		for( int i = 0; i <= 12345; i++ ) {
 			next = ig1.getId();
 		}
 			
 		IdParts id = split_10x4x5(next);
+		System.out.println(next);
+		System.out.println(id);
 		assertEquals(time,id.timestamp());
 		assertEquals(12346,id.currentId());
 		assertEquals(id.datacenterId(),3);
@@ -91,7 +94,7 @@ public class TimeIdGenTest {
 	
 	@Test
 	public void test4() {
-		TimeHostIdGenerator ig1 = TimeHostIdGenerator.idGenerator_10x4x5(1001);
+		DecimalIdGenerator ig1 = DecimalIdGenerator.idGenerator_10x4x5(1001);
 		
 		ig1.setPastShiftSlowDown(1.25);
 		
@@ -127,7 +130,7 @@ public class TimeIdGenTest {
 	@Test
 	public void test8() {
 		long time = System.currentTimeMillis()/1000;
-		IdSource ig1 = TimeHostIdGenerator.idGenerator_10x8(time);
+		IdSource ig1 = DecimalIdGenerator.idGenerator_10x8(time);
 		long prev = 0;
 		long next = 0;
 		for( int i = 1; i < 10000001; i++ ) {
@@ -144,7 +147,7 @@ public class TimeIdGenTest {
 
 	@Test
 	public void test8slow() throws InterruptedException {
-		TimeHostIdGenerator ig1 = TimeHostIdGenerator.idGenerator_10x8();
+		DecimalIdGenerator ig1 = DecimalIdGenerator.idGenerator_10x8();
 		
 		ig1.setPastShiftSlowDown(1.1);
 		
@@ -183,7 +186,7 @@ public class TimeIdGenTest {
 	public void mutliThreadTest() throws InterruptedException {
 		final int threadCount = 20;
 		final int iterationsPerThread = 1000000;
-		IdSource ig1 = TimeHostIdGenerator.idGenerator_10x8();
+		IdSource ig1 = DecimalIdGenerator.idGenerator_10x8();
 		ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
 		CountDownLatch latch = new CountDownLatch(threadCount);
 
@@ -222,7 +225,7 @@ public class TimeIdGenTest {
 
 	@Test
 	public void testStream() {
-		LongStream stream = TimeHostIdGenerator.idGenerator_10x4x5(1001).asStream();
+		LongStream stream = DecimalIdGenerator.idGenerator_10x4x5(1001).asStream();
 		stream.limit(10).forEach(System.out::println);
 	}
 
