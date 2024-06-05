@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.Assert.assertTrue;
 
-public class ByteTimeGen {
+public class ByteTimeGenTest {
 
     public static final long MAX_VALUE_MASK1 = Long.parseLong("0111111111111111111111111111111111111111111111111111111111111111", 2);
     public static final long MAX_VALUE_MASK2 = Long.parseLong("0011111111111111111111111111111111111111111111111111111111111111", 2);
