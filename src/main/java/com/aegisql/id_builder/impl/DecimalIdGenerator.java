@@ -3,6 +3,8 @@ package com.aegisql.id_builder.impl;
 import com.aegisql.id_builder.IdSourceException;
 
 import com.aegisql.id_builder.utils.Utils;
+
+import static com.aegisql.id_builder.TimeTransformer.identity;
 import static com.aegisql.id_builder.utils.Utils.*;
 
 /**
@@ -30,6 +32,7 @@ public final class DecimalIdGenerator extends AbstractIdGenerator {
 		this.hostId = hostId;
 		this.hostIdBase = (long) hostId * this.idCeil;
 		this.timeIdBase   = this.hostIdCeil * this.idCeil;
+		this.tf = identity;
 	}
 
 	/**

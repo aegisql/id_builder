@@ -14,5 +14,9 @@ public interface TimeTransformer {
 	 */
 	long transformTimestamp( long currentTimeSec );
 
+	long adjustingEpochTimestamp = 1717642585L;
+
 	TimeTransformer identity = time->time;
+	TimeTransformer adjustedEpoch = time->time-adjustingEpochTimestamp;
+	TimeTransformer restoredEpoch = time->time+adjustingEpochTimestamp;
 }

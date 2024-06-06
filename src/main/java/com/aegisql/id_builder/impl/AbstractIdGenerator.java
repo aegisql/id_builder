@@ -48,7 +48,7 @@ public abstract class AbstractIdGenerator implements IdSource {
 	/**
 	 * The Tf.
 	 */
-	protected TimeTransformer tf = identity;
+	protected TimeTransformer tf;
 	/**
 	 * The Timestamp.
 	 */

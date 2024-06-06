@@ -1,6 +1,7 @@
 package com.aegisql.id_builder.impl;
 
 import com.aegisql.id_builder.IdSourceException;
+import com.aegisql.id_builder.TimeTransformer;
 import com.aegisql.id_builder.utils.Utils;
 
 import static com.aegisql.id_builder.utils.Utils.sleepOneMSec;
@@ -11,8 +12,8 @@ import static com.aegisql.id_builder.utils.Utils.sleepOneMSec;
 public final class BinaryIdGenerator extends AbstractIdGenerator {
 
 	private final long hostId;
-	private final long hostIdBase;
-	private final long timeIdBase;
+	private final short timestampShift;
+	private final short idShift;
 
 	/**
 	 * Instantiates a new Time host id generator.
@@ -22,14 +23,15 @@ public final class BinaryIdGenerator extends AbstractIdGenerator {
 	 * @param idPos             the id pos
 	 * @param hostIdPos         the host id pos
 	 */
-	public BinaryIdGenerator(int hostId, long startTimeStampSec, int idPos, int hostIdPos) {
-        super(Utils::pow10,hostIdPos,idPos,startTimeStampSec);
+	public BinaryIdGenerator(short timestampShift, short idShift, int hostId, long startTimeStampSec, int idPos, int hostIdPos) {
+        super(Utils::pow2,hostIdPos,idPos,startTimeStampSec);
 		if (hostId > maxHostId) {
 			throw new IdSourceException("Host ID > " + maxHostId);
 		}
+		this.timestampShift = timestampShift;
+		this.idShift = idShift;
 		this.hostId = hostId;
-		this.hostIdBase = (long) hostId * this.idCeil;
-		this.timeIdBase   = this.hostIdCeil * this.idCeil;
+		this.tf = TimeTransformer.adjustedEpoch;
 	}
 
 	IdState nextState(IdState current) {
@@ -59,7 +61,12 @@ public final class BinaryIdGenerator extends AbstractIdGenerator {
 
 	long buildId(IdState idState) {
 		assert idState.currentId() <= maxId : "current ID exceeded max id";
-		return tf.transformTimestamp(idState.currentTimeStampSec()) * timeIdBase + hostIdBase + idState.currentId();
+		long time = tf.transformTimestamp(idState.currentTimeStampSec());
+		long shiftedTime = time << timestampShift;
+		long shiftedId = idState.currentId() << idShift;
+		long id =  shiftedTime | shiftedId | this.hostId;
+		assert id > 0 : "ID sign bit is set.";
+		return id;
 	}
 
 

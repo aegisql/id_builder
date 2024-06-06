@@ -7,6 +7,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicLong;
 
+import static com.aegisql.id_builder.utils.Utils.formatBinary;
 import static org.junit.Assert.assertTrue;
 
 public class ByteTimeGenTest {
@@ -44,25 +45,25 @@ public class ByteTimeGenTest {
     public void timestampMaskingTest() {
 
         long ts = System.currentTimeMillis(); //41 bit set
-        System.out.println(Long.toBinaryString(ts));
-        System.out.println(Long.toBinaryString(ts & TIMESTAMP_MASK0));
-        System.out.println(Long.toBinaryString(ts & TIMESTAMP_MASK1));
+        System.out.println(formatBinary(ts));
+        System.out.println(formatBinary(ts & TIMESTAMP_MASK0));
+        System.out.println(formatBinary(ts & TIMESTAMP_MASK1));
 
         long cutTime = (ts & TIMESTAMP_MASK1) / 1000;
-        System.out.println(Long.toBinaryString(cutTime));
+        System.out.println(formatBinary(cutTime));
 
         long nextAfterEpoch = ((long) Integer.MAX_VALUE + 1000) * 1000;
         System.out.println(new Date((nextAfterEpoch)));
 
-        System.out.println(Long.toBinaryString(nextAfterEpoch));
-        System.out.println(Long.toBinaryString(Long.MAX_VALUE));
-        System.out.println(Long.toBinaryString(Long.MAX_VALUE & MAX_VALUE_MASK2));
+        System.out.println(formatBinary(nextAfterEpoch));
+        System.out.println(formatBinary(Long.MAX_VALUE));
+        System.out.println(formatBinary(Long.MAX_VALUE & MAX_VALUE_MASK2));
 
         long time = (nextAfterEpoch/1000);
         long timeShift = time << 31;
         System.out.println(timeShift);
-        System.out.println(Long.toBinaryString(timeShift));
-        System.out.println(Long.toBinaryString(timeShift & MAX_VALUE_MASK2));
+        System.out.println(formatBinary(timeShift));
+        System.out.println(formatBinary(timeShift & MAX_VALUE_MASK2));
     }
 
     @Test
@@ -77,7 +78,7 @@ public class ByteTimeGenTest {
             long id = getId();
             assertTrue(id > prev);
             prev = id;
-            System.out.println(id+" -- "+Long.toBinaryString(id));
+            System.out.println(id+" -- "+ formatBinary(id));
             Thread.sleep(500);
         }
     }
@@ -98,18 +99,18 @@ public class ByteTimeGenTest {
         long time = System.currentTimeMillis();
         long shortTime = time / 1000;
         long timeShift = shortTime << 32;
-        System.out.println(Long.toBinaryString(Long.MAX_VALUE));
+        System.out.println(formatBinary(Long.MAX_VALUE));
 
-        System.out.println(Long.toBinaryString(time));
-        System.out.println(Long.toBinaryString(shortTime));
-        System.out.println(Long.toBinaryString(timeShift));
+        System.out.println(formatBinary(time));
+        System.out.println(formatBinary(shortTime));
+        System.out.println(formatBinary(timeShift));
 
         long hostId = (256*256-1);
         long timeAndHost = timeShift | hostId<<16;
-        System.out.println(Long.toBinaryString(timeAndHost));
+        System.out.println(formatBinary(timeAndHost));
 
         long id = timeAndHost|15;
-        System.out.println(Long.toBinaryString(id));
+        System.out.println(formatBinary(id));
         System.out.println(id);
 
     }
