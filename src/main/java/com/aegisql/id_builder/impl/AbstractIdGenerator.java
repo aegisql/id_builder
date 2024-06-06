@@ -2,13 +2,13 @@ package com.aegisql.id_builder.impl;
 
 import com.aegisql.id_builder.IdSource;
 import com.aegisql.id_builder.TimeTransformer;
+import com.aegisql.id_builder.utils.Utils;
 
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.IntUnaryOperator;
 import java.util.function.LongSupplier;
 
-import static com.aegisql.id_builder.TimeTransformer.identity;
 import static com.aegisql.id_builder.utils.Utils.*;
 
 /**
@@ -112,7 +112,30 @@ public abstract class AbstractIdGenerator implements IdSource {
 	 * @param current the current
 	 * @return the id state
 	 */
-	abstract IdState nextState(IdState current);
+	IdState nextState(IdState current) {
+		long nowMs = timestamp.getAsLong();
+		long now   = nowMs / 1000;
+		long dt    = nowMs - (now * 1000);
+		long nextCounter = current.globalCounter()+1;
+		if(now > current.currentTimeStampSec()) {
+			return new IdState(nextCounter, 0, now);
+		} else if(now == current.currentTimeStampSec()) {
+			long maxPredictedId = Math.min(maxId, dt * maxIdPerMSec);
+			if (current.currentId() >= maxPredictedId) {
+				sleepOneMSec();
+				return nextState(current);
+			} else {
+				return new IdState(nextCounter, current.currentId() + 1, now);
+			}
+		} else {
+			Utils.sleepOneMSec(nextCounter,sleepAfter);
+			if (current.currentId() >= maxId) {
+				return new IdState(nextCounter, 0, current.currentTimeStampSec() + 1);
+			} else {
+				return new IdState(nextCounter, current.currentId() + 1, current.currentTimeStampSec());
+			}
+		}
+	}
 
 	/**
 	 * Sets time transformer.

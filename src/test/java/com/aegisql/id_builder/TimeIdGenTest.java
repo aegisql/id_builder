@@ -2,6 +2,8 @@ package com.aegisql.id_builder;
 
 import static com.aegisql.id_builder.IdParts.split_10x4x5;
 import static com.aegisql.id_builder.IdParts.split_10x8;
+import static com.aegisql.id_builder.utils.Utils.unixTimestamp;
+import static java.lang.System.currentTimeMillis;
 import static org.junit.Assert.*;
 
 import java.util.HashSet;
@@ -20,7 +22,7 @@ public class TimeIdGenTest {
 
 	@Test
 	public void testWithConstructor() throws InterruptedException {
-		final long timeBase = System.currentTimeMillis() / 1000 - 1;
+		final long timeBase = unixTimestamp() - 1;
 		DecimalIdGenerator ig1 = new DecimalIdGenerator(1001,6,4);
 		ig1.setTimeTransformer(t -> t - timeBase);
 		for (int i = 0; i < 10; i++) {
@@ -33,7 +35,7 @@ public class TimeIdGenTest {
 
 	@Test
 	public void test1() {
-		long time = System.currentTimeMillis()/1000;
+		long time = unixTimestamp();
 		DecimalIdGenerator ig1 = DecimalIdGenerator.idGenerator_10x4x5(1001,time);
 		long prev = 0;
 		long next = 0;
@@ -42,17 +44,17 @@ public class TimeIdGenTest {
 			assertTrue((next != prev));
 			prev = next;
 			if( (i % 100000) == 0 ){
-				System.out.println("1: id["+i+"] = "+ next + " -- " + System.currentTimeMillis()/1000);
+				System.out.println("1: id["+i+"] = "+ next + " -- " + unixTimestamp());
 			}
 		}
-		System.out.println("last generated id = "+ next + " time = " + time + "-" + System.currentTimeMillis()/1000);
+		System.out.println("last generated id = "+ next + " time = " + time + "-" + unixTimestamp());
 		assertEquals(1000000, ig1.getGlobalCounter());
 	}
 
 	@Test
 	public void test2() {
-		long time = System.currentTimeMillis()/1000;
-		DecimalIdGenerator ig1 = DecimalIdGenerator.idGenerator_10x4x5(1001,5+(System.currentTimeMillis()/1000));
+		long time = unixTimestamp();
+		DecimalIdGenerator ig1 = DecimalIdGenerator.idGenerator_10x4x5(1001,5+unixTimestamp());
 		
 		ig1.setPastShiftSlowDown(1.5);
 		
@@ -63,16 +65,16 @@ public class TimeIdGenTest {
 			assertTrue((next != prev));
 			prev = next;
 			if( (i % 50000) == 0 ){
-				System.out.println("2: id["+i+"] = "+ next + " -- " + System.currentTimeMillis()/1000);
+				System.out.println("2: id["+i+"] = "+ next + " -- " + unixTimestamp());
 			}
 		}
-		System.out.println("last generated id = "+ next + " time = "+time+ "-" + System.currentTimeMillis()/1000);
+		System.out.println("last generated id = "+ next + " time = "+time+ "-" + unixTimestamp());
 	}
 
 
 	@Test
 	public void test3() {
-		long time = System.currentTimeMillis()/1000;
+		long time = unixTimestamp();
 		IdSource ig1 = DecimalIdGenerator.idGenerator_10x4x5( 3123 );
 		System.out.println(ig1);
 		long next = 0;
@@ -100,11 +102,11 @@ public class TimeIdGenTest {
 		
 		Set<Long> ids = new HashSet<>();
 		
-		final long now = System.currentTimeMillis();
+		final long now = currentTimeMillis();
 		final long delay = 3000;
 		
 		ig1.setTimestampSupplier(()->{
-			long timestamp = System.currentTimeMillis();
+			long timestamp = currentTimeMillis();
 			if(timestamp - now < delay) {
 				return timestamp;
 			} else {
@@ -120,7 +122,7 @@ public class TimeIdGenTest {
 			IdParts s = split_10x4x5(next);
 			max = Math.max(max, s.currentId());
 			if( (i % 50000) == 0 ){
-				System.out.println("4: id["+i+"] = "+ s + " -- " + System.currentTimeMillis()/1000);
+				System.out.println("4: id["+i+"] = "+ s + " -- " + unixTimestamp());
 			}
 		}
 		assertEquals(1000000, ids.size());
@@ -129,7 +131,7 @@ public class TimeIdGenTest {
 
 	@Test
 	public void test8() {
-		long time = System.currentTimeMillis()/1000;
+		long time = unixTimestamp();
 		IdSource ig1 = DecimalIdGenerator.idGenerator_10x8(time);
 		long prev = 0;
 		long next = 0;
@@ -139,10 +141,10 @@ public class TimeIdGenTest {
 			prev = next;
 			IdParts ip = split_10x8(next);
 			if( (i % 100000) == 0 ){
-				System.out.println("8: id["+i+"] = "+ ip + " -- " + System.currentTimeMillis()/1000);
+				System.out.println("8: id["+i+"] = "+ ip + " -- " + unixTimestamp());
 			}
 		}
-		System.out.println("last generated id = "+ next + " time = " + time + "-" + System.currentTimeMillis()/1000);
+		System.out.println("last generated id = "+ next + " time = " + time + "-" + unixTimestamp());
 	}
 
 	@Test
@@ -153,11 +155,11 @@ public class TimeIdGenTest {
 		
 		Set<Long> ids = new HashSet<>(10000001);
 		
-		final long now = System.currentTimeMillis();
+		final long now = currentTimeMillis();
 		final long delay = 500;
 		
 		ig1.setTimestampSupplier(()->{
-			long timestamp = System.currentTimeMillis();
+			long timestamp = currentTimeMillis();
 			if(timestamp - now < delay) {
 				return timestamp;
 			} else {
@@ -173,7 +175,7 @@ public class TimeIdGenTest {
 			IdParts s = split_10x8(next);
 			max = Math.max(max, s.currentId());
 			if( (i % 100000) == 0 ){
-				System.out.println("8s: id["+i+"] = "+ s + " -- " + System.currentTimeMillis()/1000);
+				System.out.println("8s: id["+i+"] = "+ s + " -- " + unixTimestamp());
 				Thread.sleep(1);
 			}
 		}

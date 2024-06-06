@@ -5,7 +5,6 @@ import com.aegisql.id_builder.IdSourceException;
 import com.aegisql.id_builder.utils.Utils;
 
 import static com.aegisql.id_builder.TimeTransformer.identity;
-import static com.aegisql.id_builder.utils.Utils.*;
 
 /**
  * The type Time host id generator.
@@ -44,31 +43,6 @@ public final class DecimalIdGenerator extends AbstractIdGenerator {
 	 */
 	public DecimalIdGenerator(int hostId, int idPos, int hostIdPos) {
 		this(hostId,System.currentTimeMillis()/1000,idPos,hostIdPos);
-	}
-
-	IdState nextState(IdState current) {
-		long nowMs = timestamp.getAsLong();
-		long now   = nowMs / 1000;
-		long dt    = nowMs - (now * 1000);
-		long nextCounter = current.globalCounter()+1;
-		if(now > current.currentTimeStampSec()) {
-			return new IdState(nextCounter, 0, now);
-		} else if(now == current.currentTimeStampSec()) {
-			long maxPredictedId = Math.min(maxId, dt * maxIdPerMSec);
-			if (current.currentId() >= maxPredictedId) {
-				sleepOneMSec();
-				return nextState(current);
-			} else {
-				return new IdState(nextCounter, current.currentId() + 1, now);
-			}
-		} else {
-			Utils.sleepOneMSec(nextCounter,sleepAfter);
-			if (current.currentId() >= maxId) {
-				return new IdState(nextCounter, 0, current.currentTimeStampSec() + 1);
-			} else {
-				return new IdState(nextCounter, current.currentId() + 1, current.currentTimeStampSec());
-			}
-		}
 	}
 
 	long buildId(IdState idState) {

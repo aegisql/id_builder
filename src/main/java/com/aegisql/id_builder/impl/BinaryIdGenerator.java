@@ -4,8 +4,6 @@ import com.aegisql.id_builder.IdSourceException;
 import com.aegisql.id_builder.TimeTransformer;
 import com.aegisql.id_builder.utils.Utils;
 
-import static com.aegisql.id_builder.utils.Utils.sleepOneMSec;
-
 /**
  * The type Time host id generator.
  */
@@ -20,43 +18,17 @@ public final class BinaryIdGenerator extends AbstractIdGenerator {
 	 *
 	 * @param hostId            the host id
 	 * @param startTimeStampSec the start time stamp sec
-	 * @param idPos             the id pos
-	 * @param hostIdPos         the host id pos
+	 * @param hostIdBits         the host id pos
 	 */
-	public BinaryIdGenerator(short timestampShift, short idShift, int hostId, long startTimeStampSec, int idPos, int hostIdPos) {
-        super(Utils::pow2,hostIdPos,idPos,startTimeStampSec);
+	public BinaryIdGenerator(long startTimeStampSec, short timestampExtraBits, int hostId, int hostIdBits) {
+        super(Utils::pow2,hostIdBits,64 - 32 - timestampExtraBits - hostIdBits,startTimeStampSec);
 		if (hostId > maxHostId) {
 			throw new IdSourceException("Host ID > " + maxHostId);
 		}
-		this.timestampShift = timestampShift;
-		this.idShift = idShift;
+		this.timestampShift = (short) (32 - timestampExtraBits);
+		this.idShift = (short) hostIdBits;
 		this.hostId = hostId;
 		this.tf = TimeTransformer.adjustedEpoch;
-	}
-
-	IdState nextState(IdState current) {
-		long nowMs = timestamp.getAsLong();
-		long now   = nowMs / 1000;
-		long dt    = nowMs - (now * 1000);
-		long nextCounter = current.globalCounter()+1;
-		if(now > current.currentTimeStampSec()) {
-			return new IdState(nextCounter, 0, now);
-		} else if(now == current.currentTimeStampSec()) {
-			long maxPredictedId = Math.min(maxId, dt * maxIdPerMSec);
-			if (current.currentId() >= maxPredictedId) {
-				sleepOneMSec();
-				return nextState(current);
-			} else {
-				return new IdState(nextCounter, current.currentId() + 1, now);
-			}
-		} else {
-			Utils.sleepOneMSec(nextCounter,sleepAfter);
-			if (current.currentId() >= maxId) {
-				return new IdState(nextCounter, 0, current.currentTimeStampSec() + 1);
-			} else {
-				return new IdState(nextCounter, current.currentId() + 1, current.currentTimeStampSec());
-			}
-		}
 	}
 
 	long buildId(IdState idState) {

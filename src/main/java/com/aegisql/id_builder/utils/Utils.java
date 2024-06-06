@@ -2,9 +2,6 @@ package com.aegisql.id_builder.utils;
 
 import com.aegisql.id_builder.IdSourceException;
 
-import java.util.function.LongSupplier;
-import java.util.function.Supplier;
-
 public class Utils {
 
     public static void sleepOneMSec() {
@@ -33,6 +30,10 @@ public class Utils {
         if(x < 1) {
             throw new IdSourceException(format.formatted(x));
         }
+    }
+
+    public static long unixTimestamp() {
+        return System.currentTimeMillis()/1000;
     }
 
     public static String formatBinary(long value) {
