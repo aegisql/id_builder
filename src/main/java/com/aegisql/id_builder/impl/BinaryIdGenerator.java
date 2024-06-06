@@ -4,6 +4,8 @@ import com.aegisql.id_builder.IdSourceException;
 import com.aegisql.id_builder.TimeTransformer;
 import com.aegisql.id_builder.utils.Utils;
 
+import static com.aegisql.id_builder.utils.Utils.assertPositive;
+
 /**
  * The type Time host id generator.
  */
@@ -22,6 +24,7 @@ public final class BinaryIdGenerator extends AbstractIdGenerator {
 	 */
 	public BinaryIdGenerator(long startTimeStampSec, short timestampExtraBits, int hostId, int hostIdBits) {
         super(Utils::pow2,hostIdBits,64 - 32 - timestampExtraBits - hostIdBits,startTimeStampSec);
+		assertPositive(timestampExtraBits,"timestampExtraBits extra bits must be a small positive number");
 		if (hostId > maxHostId) {
 			throw new IdSourceException("Host ID > " + maxHostId);
 		}

@@ -231,4 +231,9 @@ public class TimeIdGenTest {
 		stream.limit(10).forEach(System.out::println);
 	}
 
+	@Test(expected = IdSourceException.class)
+	public void testHostIdExeption() {
+		DecimalIdGenerator.idGenerator_10x4x5(10010);
+	}
+
 }

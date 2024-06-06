@@ -3,7 +3,6 @@ package com.aegisql.id_builder.impl;
 import com.aegisql.id_builder.IdSourceException;
 
 import com.aegisql.id_builder.utils.Utils;
-
 import static com.aegisql.id_builder.TimeTransformer.identity;
 
 /**
