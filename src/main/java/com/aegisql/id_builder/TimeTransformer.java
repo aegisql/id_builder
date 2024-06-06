@@ -1,6 +1,5 @@
 package com.aegisql.id_builder;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Interface TimeTransformer.
  */

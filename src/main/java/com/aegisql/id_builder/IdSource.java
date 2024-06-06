@@ -1,7 +1,5 @@
 package com.aegisql.id_builder;
 
-// TODO: Auto-generated Javadoc
-
 import java.util.stream.LongStream;
 
 /**
