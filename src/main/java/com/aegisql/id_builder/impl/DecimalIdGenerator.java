@@ -49,7 +49,7 @@ public final class DecimalIdGenerator extends AbstractIdGenerator {
 		return tf.transformTimestamp(idState.currentTimeStampSec()) * timeIdBase + hostIdBase + idState.currentId();
 	}
 
-    /**
+	/**
 	 * Id generator 10 x 4 x 5 time host id generator.
 	 *
 	 * @param hostId            the host id
@@ -73,17 +73,28 @@ public final class DecimalIdGenerator extends AbstractIdGenerator {
 	/**
 	 * Id generator 10 x 8 time host id generator.
 	 *
+	 * @param hostId            the host id
 	 * @param startTimeStampSec the start time stamp sec
 	 * @return the time host id generator
 	 */
-	public static DecimalIdGenerator idGenerator_10x8(long startTimeStampSec) {
-		return new DecimalIdGenerator(0, startTimeStampSec, 8, 1);
+	public static DecimalIdGenerator idGenerator_10x8(int hostId, long startTimeStampSec) {
+		return new DecimalIdGenerator(hostId, startTimeStampSec, 8, 1);
 	}
 
 	/**
 	 * Id generator 10 x 8 time host id generator.
 	 *
+	 * @param hostId the host id
 	 * @return the time host id generator
+	 */
+	public static DecimalIdGenerator idGenerator_10x8(int hostId) {
+		return new DecimalIdGenerator(hostId, 8, 1);
+	}
+
+	/**
+	 * Id generator 10 x 8 decimal id generator.
+	 *
+	 * @return the decimal id generator
 	 */
 	public static DecimalIdGenerator idGenerator_10x8() {
 		return new DecimalIdGenerator(0, 8, 1);

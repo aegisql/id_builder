@@ -132,7 +132,7 @@ public class TimeIdGenTest {
 	@Test
 	public void test8() {
 		long time = unixTimestamp();
-		IdSource ig1 = DecimalIdGenerator.idGenerator_10x8(time);
+		IdSource ig1 = DecimalIdGenerator.idGenerator_10x8(1,time);
 		long prev = 0;
 		long next = 0;
 		for( int i = 1; i < 10000001; i++ ) {

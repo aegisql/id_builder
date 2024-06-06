@@ -18,8 +18,9 @@ public final class BinaryIdGenerator extends AbstractIdGenerator {
 	/**
 	 * Instantiates a new Time host id generator.
 	 *
-	 * @param hostId            the host id
-	 * @param startTimeStampSec the start time stamp sec
+	 * @param startTimeStampSec  the start time stamp sec
+	 * @param timestampExtraBits the timestamp extra bits
+	 * @param hostId             the host id
 	 * @param hostIdBits         the host id pos
 	 */
 	public BinaryIdGenerator(long startTimeStampSec, short timestampExtraBits, int hostId, int hostIdBits) {
