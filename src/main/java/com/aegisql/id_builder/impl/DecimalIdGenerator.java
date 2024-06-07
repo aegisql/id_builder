@@ -4,6 +4,7 @@ import com.aegisql.id_builder.IdSourceException;
 
 import com.aegisql.id_builder.utils.Utils;
 import static com.aegisql.id_builder.TimeTransformer.identity;
+import static com.aegisql.id_builder.utils.Utils.unixTimestamp;
 
 /**
  * The type Time host id generator.
@@ -31,6 +32,14 @@ public final class DecimalIdGenerator extends AbstractIdGenerator {
 		this.hostIdBase = (long) hostId * this.idCeil;
 		this.timeIdBase   = this.hostIdCeil * this.idCeil;
 		this.tf = identity;
+	}
+
+	public DecimalIdGenerator(long startTimeStampSec) {
+		this(0,startTimeStampSec,9,0 );
+	}
+
+	public DecimalIdGenerator() {
+		this(unixTimestamp());
 	}
 
 	/**

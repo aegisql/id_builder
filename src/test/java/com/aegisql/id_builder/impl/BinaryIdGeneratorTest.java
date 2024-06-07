@@ -57,4 +57,16 @@ public class BinaryIdGeneratorTest {
         new BinaryIdGenerator(unixTimestamp(), (short) 1,0xFFFF,-12);
     }
 
+    @Test
+    public void noHostGeneratorTest() {
+        BinaryIdGenerator ig = new BinaryIdGenerator();
+        System.out.println(ig);
+        AtomicLong prev = new AtomicLong();
+        ig.asStream().limit(10).forEach(id->{
+            System.out.println(id);
+            assertTrue(prev.get() < id);
+            prev.set(id);
+        });
+    }
+
 }

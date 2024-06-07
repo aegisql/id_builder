@@ -19,15 +19,23 @@ public class Utils {
     }
 
     public static int pow10(int x) {
-        return (int) Math.round(Math.pow(10, x));
+        long pow = Math.round(Math.pow(10, x));
+        return pow > Integer.MAX_VALUE ? Integer.MAX_VALUE: (int) pow;
     }
 
     public static int pow2(int x) {
-        return (int) Math.round(Math.pow(2, x));
+        long pow = Math.round(Math.pow(2, x));
+        return pow > Integer.MAX_VALUE ? Integer.MAX_VALUE: (int) pow;
     }
 
     public static void assertPositive(int x, String format) {
         if(x < 1) {
+            throw new IdSourceException(format.formatted(x));
+        }
+    }
+
+    public static void assertNotNegative(int x, String format) {
+        if(x < 0) {
             throw new IdSourceException(format.formatted(x));
         }
     }

@@ -1,5 +1,6 @@
 package com.aegisql.id_builder.impl;
 
+import com.aegisql.id_builder.IdParts;
 import com.aegisql.id_builder.IdSource;
 import com.aegisql.id_builder.TimeTransformer;
 import com.aegisql.id_builder.utils.Utils;
@@ -64,7 +65,7 @@ public abstract class AbstractIdGenerator implements IdSource {
 	 */
 	protected AbstractIdGenerator(IntUnaryOperator idCeilFunction, int hostPositions, int idPositions, long startTimeStampSec) {
 		Objects.requireNonNull(idCeilFunction,"Expected ID Ceil function");
-		assertPositive(hostPositions,"Number of host ID positions must be >= 1");
+		assertNotNegative(hostPositions,"Number of host ID positions must be >= 0");
 		assertPositive(idPositions,"Number of ID positions must be >= 1");
 		this.idCeil = idCeilFunction.applyAsInt(idPositions);
 		this.hostIdCeil = idCeilFunction.applyAsInt(hostPositions);
@@ -105,6 +106,8 @@ public abstract class AbstractIdGenerator implements IdSource {
 	 * @return the long
 	 */
 	abstract long buildId(IdState newState);
+
+	//public abstract IdParts parse(long id);
 
 	/**
 	 * Next state id state.
