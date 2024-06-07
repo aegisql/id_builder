@@ -1,5 +1,6 @@
 package com.aegisql.id_builder.impl;
 
+import com.aegisql.id_builder.IdParts;
 import com.aegisql.id_builder.IdSourceException;
 import com.aegisql.id_builder.TimeTransformer;
 import com.aegisql.id_builder.utils.Utils;
@@ -51,6 +52,18 @@ public final class BinaryIdGenerator extends AbstractIdGenerator {
 		long id =  shiftedTime | shiftedId | this.hostId;
 		assert id > 0 : "ID sign bit is set.";
 		return id;
+	}
+
+	@Override
+	public IdParts parse(long id) {
+		long timestamp = id >>> timestampShift;
+		long timestampMask = Utils.setLowerBits(timestampShift);
+		long removedTimestamp = id & timestampMask;
+		long currentId = removedTimestamp >>> idShift;
+		long idMask = Utils.setLowerBits(idShift);
+		long removedTimestampAndId = id & idMask;
+		int hostId = (int) removedTimestampAndId;
+		return new IdParts(timestamp,hostId,currentId);
 	}
 
 

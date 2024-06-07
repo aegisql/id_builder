@@ -59,4 +59,13 @@ public class Utils {
         return  formattedBinary.toString();
     }
 
+    public static long setHigherBits(int bitPosition) {
+        long mask = 1L << bitPosition-1;
+        return -(mask << 1);
+    }
+
+    public static long setLowerBits(int bitPosition) {
+        long mask = 1L << bitPosition-1;
+        return (mask << 1) - 1;
+    }
 }

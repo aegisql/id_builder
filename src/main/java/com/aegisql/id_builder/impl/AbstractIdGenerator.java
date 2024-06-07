@@ -107,7 +107,7 @@ public abstract class AbstractIdGenerator implements IdSource {
 	 */
 	abstract long buildId(IdState newState);
 
-	//public abstract IdParts parse(long id);
+	public abstract IdParts parse(long id);
 
 	/**
 	 * Next state id state.

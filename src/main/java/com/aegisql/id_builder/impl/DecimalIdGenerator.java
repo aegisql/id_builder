@@ -1,5 +1,6 @@
 package com.aegisql.id_builder.impl;
 
+import com.aegisql.id_builder.IdParts;
 import com.aegisql.id_builder.IdSourceException;
 
 import com.aegisql.id_builder.utils.Utils;
@@ -56,6 +57,21 @@ public final class DecimalIdGenerator extends AbstractIdGenerator {
 	long buildId(IdState idState) {
 		assert idState.currentId() <= maxId : "current ID exceeded max id";
 		return tf.transformTimestamp(idState.currentTimeStampSec()) * timeIdBase + hostIdBase + idState.currentId();
+	}
+
+	private final static long _10XX19 = 1000000000000000000L;
+	@Override
+	public IdParts parse(long id) {
+		long adjustTimestamp = 0;
+		if(id < _10XX19) {
+			adjustTimestamp = _10XX19/(idCeil*hostIdCeil);
+			id = _10XX19 +id;
+		}
+		long timestamp = id / (idCeil*hostIdCeil);
+		long dcHostId = id - timestamp * (idCeil*hostIdCeil);
+		long dcHost = dcHostId / idCeil;
+		long currentId = dcHostId - dcHost * idCeil;
+		return new IdParts(timestamp-adjustTimestamp, (int) dcHost, currentId);
 	}
 
 	/**

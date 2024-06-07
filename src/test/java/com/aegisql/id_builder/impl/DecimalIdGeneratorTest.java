@@ -1,7 +1,5 @@
 package com.aegisql.id_builder.impl;
 
-import static com.aegisql.id_builder.IdParts.split_10x4x5;
-import static com.aegisql.id_builder.IdParts.split_10x8;
 import static com.aegisql.id_builder.utils.Utils.unixTimestamp;
 import static java.lang.System.currentTimeMillis;
 import static org.junit.Assert.*;
@@ -29,7 +27,7 @@ public class DecimalIdGeneratorTest {
 		ig1.setTimeTransformer(t -> t - timeBase);
 		for (int i = 0; i < 10; i++) {
 			long id = ig1.getId();
-			System.out.println(id);
+			System.out.println(id + " -- "+ig1.parse(id));
 			Thread.sleep(300);
 			assertTrue(id < 100000000000L);
 		}
@@ -46,7 +44,7 @@ public class DecimalIdGeneratorTest {
 			assertTrue((next != prev));
 			prev = next;
 			if( (i % 100000) == 0 ){
-				System.out.println("1: id["+i+"] = "+ next + " -- " + unixTimestamp());
+				System.out.println("1: id["+i+"] = "+ next + " -- " + unixTimestamp() + " -- "+ig1.parse(next));
 			}
 		}
 		System.out.println("last generated id = "+ next + " time = " + time + "-" + unixTimestamp());
@@ -77,20 +75,19 @@ public class DecimalIdGeneratorTest {
 	@Test
 	public void test3() {
 		long time = unixTimestamp();
-		IdSource ig1 = DecimalIdGenerator.idGenerator_10x4x5( 3123 );
+		var ig1 = DecimalIdGenerator.idGenerator_10x4x5( 3123 );
 		System.out.println(ig1);
 		long next = 0;
 		for( int i = 0; i <= 12345; i++ ) {
 			next = ig1.getId();
 		}
 			
-		IdParts id = split_10x4x5(next);
+		IdParts id = ig1.parse(next);
 		System.out.println(next);
 		System.out.println(id);
 		assertEquals(time,id.timestamp());
 		assertEquals(12346,id.currentId());
-		assertEquals(id.datacenterId(),3);
-		assertEquals(id.hostId(),123);
+		assertEquals(id.hostId(),3123);
 		System.out.println(next+" -- "+id + " @ " + id.getIdDateTime());
 
 	}
@@ -121,7 +118,7 @@ public class DecimalIdGeneratorTest {
 			Long next = ig1.getId();
 			assertFalse(ids.contains(next));
 			ids.add(next);
-			IdParts s = split_10x4x5(next);
+			IdParts s = ig1.parse(next);
 			max = Math.max(max, s.currentId());
 			if( (i % 50000) == 0 ){
 				System.out.println("4: id["+i+"] = "+ s + " -- " + unixTimestamp());
@@ -134,14 +131,14 @@ public class DecimalIdGeneratorTest {
 	@Test
 	public void test8() {
 		long time = unixTimestamp();
-		IdSource ig1 = DecimalIdGenerator.idGenerator_10x8(1,time);
+		var ig1 = DecimalIdGenerator.idGenerator_10x8(1,time);
 		long prev = 0;
 		long next = 0;
 		for( int i = 1; i < 10000001; i++ ) {
 			next = ig1.getId();
 			assertTrue((next != prev));
 			prev = next;
-			IdParts ip = split_10x8(next);
+			IdParts ip = ig1.parse(next);
 			if( (i % 100000) == 0 ){
 				System.out.println("8: id["+i+"] = "+ ip + " -- " + unixTimestamp());
 			}
@@ -174,7 +171,7 @@ public class DecimalIdGeneratorTest {
 			Long next = ig1.getId();
 			assertFalse(ids.contains(next));
 			ids.add(next);
-			IdParts s = split_10x8(next);
+			IdParts s = ig1.parse(next);
 			max = Math.max(max, s.currentId());
 			if( (i % 100000) == 0 ){
 				System.out.println("8s: id["+i+"] = "+ s + " -- " + unixTimestamp());

@@ -21,7 +21,7 @@ public class BinaryIdGeneratorTest {
         AtomicLong prev = new AtomicLong();
         ig.asStream().limit(1000000).forEach(id->{
             if(ig.getGlobalCounter()%100000==0) {
-                System.out.println(id + " -- " + formatBinary(id));
+                System.out.println(id + " -- " + formatBinary(id)+" -- "+ig.parse(id));
             }
             assertTrue(prev.get() < id);
             prev.set(id);
