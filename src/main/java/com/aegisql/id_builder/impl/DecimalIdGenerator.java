@@ -71,6 +71,9 @@ public final class DecimalIdGenerator extends AbstractIdGenerator {
 		long dcHostId = id - timestamp * (idCeil*hostIdCeil);
 		long dcHost = dcHostId / idCeil;
 		long currentId = dcHostId - dcHost * idCeil;
+		if(dcHost >= maxHostId) {
+			dcHost = -1;
+		}
 		return new IdParts(timestamp-adjustTimestamp, (int) dcHost, currentId);
 	}
 
@@ -122,13 +125,13 @@ public final class DecimalIdGenerator extends AbstractIdGenerator {
 	 * @return the decimal id generator
 	 */
 	public static DecimalIdGenerator idGenerator_10x8() {
-		return new DecimalIdGenerator(0, 8, 1);
+		return idGenerator_10x8(0);
 	}
 
 	@Override
 	public String toString() {
         return "DecimalIdGenerator{" +
-				"hostId=" + hostId +
+				"hostId=" + (hostId < maxHostId ? hostId: "N/A") +
 				", maxHostId=" + maxHostId +
 				", maxId=" + maxId +
                 ", maxIdsPerMSec=" + maxIdPerMSec +

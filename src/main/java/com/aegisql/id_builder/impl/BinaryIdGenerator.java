@@ -63,6 +63,9 @@ public final class BinaryIdGenerator extends AbstractIdGenerator {
 		long idMask = Utils.setLowerBits(idShift);
 		long removedTimestampAndId = id & idMask;
 		int hostId = (int) removedTimestampAndId;
+		if(hostId >= maxHostId) {
+			hostId = -1;
+		}
 		return new IdParts(timestamp,hostId,currentId);
 	}
 
@@ -70,7 +73,7 @@ public final class BinaryIdGenerator extends AbstractIdGenerator {
 	@Override
 	public String toString() {
         return "BinaryIdGenerator{" +
-				"hostId=" + hostId +
+				"hostId=" + (hostId < maxHostId ? hostId: "N/A") +
 				", maxHostId=" + maxHostId +
 				", maxId=" + maxId +
                 ", maxIdsPerMSec=" + maxIdPerMSec +

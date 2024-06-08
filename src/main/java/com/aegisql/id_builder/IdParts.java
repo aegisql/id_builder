@@ -35,7 +35,7 @@ public record IdParts(long timestamp, int hostId, long currentId) {
 	public String toString() {
 		return timestamp +
 				"." +
-				hostId +
+				(hostId >= 0 ? hostId:"") +
 				"." +
 				currentId;
 	}
