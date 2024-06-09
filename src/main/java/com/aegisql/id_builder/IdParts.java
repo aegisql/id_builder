@@ -8,17 +8,6 @@ import java.util.Date;
  * The type Id parts.
  */
 public record IdParts(long timestamp, int hostId, long currentId) {
-
-	/**
-	 * Instantiates a new Id parts.
-	 *
-	 * @param timestamp    the timestamp
-	 * @param hostId       the host id
-	 * @param currentId    the current id
-	 */
-	public IdParts {
-	}
-
 	/**
 	 * Gets id date time.
 	 *
@@ -39,5 +28,4 @@ public record IdParts(long timestamp, int hostId, long currentId) {
 				"." +
 				currentId;
 	}
-
 }
