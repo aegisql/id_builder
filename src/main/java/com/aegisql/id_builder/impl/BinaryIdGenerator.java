@@ -66,7 +66,13 @@ public final class BinaryIdGenerator extends AbstractIdGenerator {
 		if(hostId >= maxHostId) {
 			hostId = -1;
 		}
-		return new IdParts(timestamp,hostId,currentId);
+		TimeTransformer tt;
+		if(this.tf == TimeTransformer.adjustedEpoch) {
+			tt = TimeTransformer.restoredEpoch;
+		} else {
+			tt = TimeTransformer.identity;
+		}
+		return new IdParts(tt.transformTimestamp(timestamp),hostId,currentId);
 	}
 
 

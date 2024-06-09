@@ -16,6 +16,7 @@ import java.util.stream.LongStream;
 import com.aegisql.id_builder.IdParts;
 import com.aegisql.id_builder.IdSource;
 import com.aegisql.id_builder.IdSourceException;
+import com.aegisql.id_builder.TimeTransformer;
 import org.junit.Test;
 
 public class DecimalIdGeneratorTest {
@@ -238,6 +239,7 @@ public class DecimalIdGeneratorTest {
 	@Test
 	public void noHostGeneratorTest() {
 		DecimalIdGenerator ig = new DecimalIdGenerator();
+		ig.setTimeTransformer(TimeTransformer.adjustedEpoch);
 		System.out.println(ig);
 		AtomicLong prev = new AtomicLong();
 		ig.asStream().limit(10).forEach(id->{

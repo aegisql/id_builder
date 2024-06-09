@@ -3,6 +3,7 @@ package com.aegisql.id_builder.impl;
 import com.aegisql.id_builder.IdParts;
 import com.aegisql.id_builder.IdSourceException;
 
+import com.aegisql.id_builder.TimeTransformer;
 import com.aegisql.id_builder.utils.Utils;
 import static com.aegisql.id_builder.TimeTransformer.identity;
 import static com.aegisql.id_builder.utils.Utils.unixTimestamp;
@@ -74,7 +75,13 @@ public final class DecimalIdGenerator extends AbstractIdGenerator {
 		if(dcHost >= maxHostId) {
 			dcHost = -1;
 		}
-		return new IdParts(timestamp-adjustTimestamp, (int) dcHost, currentId);
+		TimeTransformer tt;
+		if(this.tf == TimeTransformer.adjustedEpoch) {
+			tt = TimeTransformer.restoredEpoch;
+		} else {
+			tt = TimeTransformer.identity;
+		}
+		return new IdParts(tt.transformTimestamp(timestamp-adjustTimestamp), (int) dcHost, currentId);
 	}
 
 	/**

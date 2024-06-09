@@ -63,7 +63,7 @@ public class BinaryIdGeneratorTest {
         System.out.println(ig);
         AtomicLong prev = new AtomicLong();
         ig.asStream().limit(10).forEach(id->{
-            System.out.println(id+" -- "+ig.parse(id));
+            System.out.println(id+" -- "+ig.parse(id) + " "+ig.parse(id).getIdDateTime());
             assertTrue(prev.get() < id);
             prev.set(id);
         });
