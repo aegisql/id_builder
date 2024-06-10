@@ -18,13 +18,13 @@ public class Utils {
         }
     }
 
-    public static int pow10(int x) {
+    public static int pow10Sticky(int x) {
         long pow = Math.round(Math.pow(10, x));
         return pow > Integer.MAX_VALUE ? Integer.MAX_VALUE: (int) pow;
     }
 
-    public static int pow2(int x) {
-        long pow = Math.round(Math.pow(2, x));
+    public static int pow2Sticky(int x) {
+        long pow = 1L << x;
         return pow > Integer.MAX_VALUE ? Integer.MAX_VALUE: (int) pow;
     }
 

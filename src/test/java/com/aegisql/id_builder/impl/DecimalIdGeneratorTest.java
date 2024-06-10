@@ -1,5 +1,6 @@
 package com.aegisql.id_builder.impl;
 
+import static com.aegisql.id_builder.utils.Utils.formatBinary;
 import static com.aegisql.id_builder.utils.Utils.unixTimestamp;
 import static java.lang.System.currentTimeMillis;
 import static org.junit.Assert.*;
@@ -248,4 +249,36 @@ public class DecimalIdGeneratorTest {
 			prev.set(id);
 		});
 	}
+
+	@Test
+	public void parserTest() {
+		var p090 = getParts(0,9,0);
+		assertEquals(-1,p090.hostId());
+
+		var p581 = getParts(5,8,1);
+		assertEquals(5,p581.hostId());
+
+		var p5572 = getParts(55,7,2);
+		assertEquals(55,p5572.hostId());
+
+		var p55563 = getParts(555,6,3);
+		assertEquals(555,p55563.hostId());
+
+		var p55555536 = getParts(555555,3,6);
+		assertEquals(555555,p55555536.hostId());
+
+	}
+
+	private IdParts getParts(int hostId, int idPos, int hostIdPos) {
+		long timestamp = unixTimestamp();
+		var ig = new DecimalIdGenerator(hostId,timestamp,idPos,hostIdPos);
+		ig.setTimestampSupplier(()->timestamp); //always the same time
+		long id = ig.asStream().skip(100).findFirst().orElse(-1L);
+		var parts = ig.parse(id);
+		System.out.println(id+" -- " + formatBinary(id)+" -- "+parts);
+		assertEquals(timestamp,parts.timestamp());
+		assertEquals(101,parts.currentId());
+		return parts;
+	}
+
 }

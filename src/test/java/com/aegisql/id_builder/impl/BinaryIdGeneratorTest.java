@@ -1,5 +1,6 @@
 package com.aegisql.id_builder.impl;
 
+import com.aegisql.id_builder.IdParts;
 import com.aegisql.id_builder.IdSourceException;
 import org.junit.Test;
 
@@ -67,6 +68,32 @@ public class BinaryIdGeneratorTest {
             assertTrue(prev.get() < id);
             prev.set(id);
         });
+    }
+
+    @Test
+    public void parserTest() {
+        var p000 = getParts(0,0,0);
+        assertEquals(-1,p000.hostId());
+
+        var p011 = getParts(0,1,1);
+        assertEquals(1,p011.hostId());
+
+        var p132 = getParts(1,3,2);
+        assertEquals(3,p132.hostId());
+
+    }
+
+    private IdParts getParts(int shift, int hostId, int hostBits) {
+        long timestamp = unixTimestamp();
+
+        var ig0 = new BinaryIdGenerator(timestamp, (short) shift,hostId,hostBits);
+        ig0.setTimestampSupplier(()->timestamp); //always same time
+        long id0 = ig0.asStream().skip(100).findFirst().orElse(-1L);
+        var parts0 = ig0.parse(id0);
+        System.out.println(id0+" -- " + formatBinary(id0)+" -- "+parts0);
+        assertEquals(timestamp,parts0.timestamp());
+        assertEquals(101,parts0.currentId());
+        return parts0;
     }
 
 }

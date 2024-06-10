@@ -26,7 +26,7 @@ public final class DecimalIdGenerator extends AbstractIdGenerator {
 	 * @param hostIdPos         the host id pos
 	 */
 	public DecimalIdGenerator(int hostId, long startTimeStampSec, int idPos, int hostIdPos) {
-        super(Utils::pow10,hostIdPos,idPos,startTimeStampSec);
+        super(Utils::pow10Sticky,hostIdPos,idPos,startTimeStampSec);
 		if (hostId > maxHostId) {
 			throw new IdSourceException("Host ID > " + maxHostId);
 		}

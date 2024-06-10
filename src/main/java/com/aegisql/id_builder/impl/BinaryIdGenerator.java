@@ -25,7 +25,7 @@ public final class BinaryIdGenerator extends AbstractIdGenerator {
 	 * @param hostIdBits         the host id pos
 	 */
 	public BinaryIdGenerator(long startTimeStampSec, short timestampExtraBits, int hostId, int hostIdBits) {
-        super(Utils::pow2,hostIdBits,64 - 32 - timestampExtraBits - hostIdBits,startTimeStampSec);
+        super(Utils::pow2Sticky,hostIdBits,64 - 32 - timestampExtraBits - hostIdBits,startTimeStampSec);
 		assertNotNegative(timestampExtraBits,"timestampExtraBits extra bits must be a small number or 0");
 		if (hostId > maxHostId) {
 			throw new IdSourceException("Host ID > " + maxHostId);
@@ -63,7 +63,7 @@ public final class BinaryIdGenerator extends AbstractIdGenerator {
 		long idMask = Utils.setLowerBits(idShift);
 		long removedTimestampAndId = id & idMask;
 		int hostId = (int) removedTimestampAndId;
-		if(hostId >= maxHostId) {
+		if(hostId > maxHostId) {
 			hostId = -1;
 		}
 		TimeTransformer tt;
