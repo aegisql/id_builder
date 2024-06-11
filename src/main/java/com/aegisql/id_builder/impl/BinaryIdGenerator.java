@@ -36,19 +36,27 @@ public final class BinaryIdGenerator extends AbstractIdGenerator {
 		this.tf = TimeTransformer.adjustedEpoch;
 	}
 
+	/**
+	 * Instantiates a new Binary id generator.
+	 */
 	public BinaryIdGenerator() {
 		this(unixTimestamp());
 	}
 
+	/**
+	 * Instantiates a new Binary id generator.
+	 *
+	 * @param startTimeStampSec the start time stamp sec
+	 */
 	public BinaryIdGenerator(long startTimeStampSec) {
 		this(startTimeStampSec, (short) 0,0,0);
 	}
 
-	long buildId(IdState idState) {
-		assert idState.currentId() <= maxId : "current ID exceeded max id";
-		long time = tf.transformTimestamp(idState.currentTimeStampSec());
+	long buildId() {
+		assert currentId <= maxId : "current ID exceeded max id";
+		long time = tf.transformTimestamp(currentTimeStampSec);
 		long shiftedTime = time << timestampShift;
-		long shiftedId = idState.currentId() << idShift;
+		long shiftedId = currentId << idShift;
 		long id =  shiftedTime | shiftedId | this.hostId;
 		assert id > 0 : "ID sign bit is set.";
 		return id;

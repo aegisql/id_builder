@@ -6,7 +6,6 @@ import com.aegisql.id_builder.TimeTransformer;
 import com.aegisql.id_builder.utils.Utils;
 
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.IntUnaryOperator;
 import java.util.function.LongSupplier;
 
@@ -37,10 +36,16 @@ public abstract class AbstractIdGenerator implements IdSource {
 	 * The Max id per m sec.
 	 */
 	protected final long maxIdPerMSec;
+
+	private long globalCounter;
 	/**
-	 * The Id state ref.
+	 * The Current id.
 	 */
-	final AtomicReference<IdState> idStateRef = new AtomicReference<>();
+	protected long currentId;
+	/**
+	 * The Current time stamp sec.
+	 */
+	protected long currentTimeStampSec;
 
 	/**
 	 * The Sleep after.
@@ -72,7 +77,9 @@ public abstract class AbstractIdGenerator implements IdSource {
 		this.maxId = this.idCeil - 1;
 		this.maxHostId = this.hostIdCeil - 1;
 		this.maxIdPerMSec = this.idCeil / 1000;
-		this.idStateRef.set(new IdState(0, 0, startTimeStampSec));
+		this.globalCounter = 0;
+		this.currentId = 0;
+		this.currentTimeStampSec = startTimeStampSec;
 		setPastShiftSlowDown(1.2);
 	}
 
@@ -89,56 +96,53 @@ public abstract class AbstractIdGenerator implements IdSource {
 	 * @see com.aegisql.id_builder.IdSource#getId()
 	 */
 	@Override
-	public long getId() {
-		while (true) {
-			IdState expectedState = idStateRef.get();
-			IdState newState = nextState(expectedState);
-			if( idStateRef.compareAndSet(expectedState,newState)) {
-				return buildId(newState);
-            }
+	public synchronized long getId() {
+		long nowMs = timestamp.getAsLong();
+		long now   = nowMs / 1000;
+		long dt    = nowMs - (now * 1000);
+		long nextCounter = globalCounter+1;
+		if(now > currentTimeStampSec) {
+			globalCounter = nextCounter;
+			currentId = 0;
+			currentTimeStampSec = now;
+		} else if(now == currentTimeStampSec) {
+			long maxPredictedId = Math.min(maxId, dt * maxIdPerMSec);
+			if (currentId >= maxPredictedId) {
+				sleepOneMSec();
+				return getId();
+			} else {
+				globalCounter = nextCounter;
+				currentId = currentId+1;
+			}
+		} else {
+			Utils.sleepOneMSec(nextCounter,sleepAfter);
+			if (currentId >= maxId) {
+				globalCounter = nextCounter;
+				currentId = 0;
+				currentTimeStampSec = currentTimeStampSec+1;
+			} else {
+				globalCounter = nextCounter;
+				currentId = currentId+1;
+			}
 		}
+
+		return buildId();
 	}
 
 	/**
 	 * Build id long.
 	 *
-	 * @param newState the new state
 	 * @return the long
 	 */
-	abstract long buildId(IdState newState);
-
-	public abstract IdParts parse(long id);
+	abstract long buildId();
 
 	/**
-	 * Next state id state.
+	 * Parse id parts.
 	 *
-	 * @param current the current
-	 * @return the id state
+	 * @param id the id
+	 * @return the id parts
 	 */
-	IdState nextState(IdState current) {
-		long nowMs = timestamp.getAsLong();
-		long now   = nowMs / 1000;
-		long dt    = nowMs - (now * 1000);
-		long nextCounter = current.globalCounter()+1;
-		if(now > current.currentTimeStampSec()) {
-			return new IdState(nextCounter, 0, now);
-		} else if(now == current.currentTimeStampSec()) {
-			long maxPredictedId = Math.min(maxId, dt * maxIdPerMSec);
-			if (current.currentId() >= maxPredictedId) {
-				sleepOneMSec();
-				return nextState(current);
-			} else {
-				return new IdState(nextCounter, current.currentId() + 1, now);
-			}
-		} else {
-			Utils.sleepOneMSec(nextCounter,sleepAfter);
-			if (current.currentId() >= maxId) {
-				return new IdState(nextCounter, 0, current.currentTimeStampSec() + 1);
-			} else {
-				return new IdState(nextCounter, current.currentId() + 1, current.currentTimeStampSec());
-			}
-		}
-	}
+	public abstract IdParts parse(long id);
 
 	/**
 	 * Sets time transformer.
@@ -164,7 +168,7 @@ public abstract class AbstractIdGenerator implements IdSource {
 	 * @return the global counter
 	 */
 	public long getGlobalCounter() {
-		return idStateRef.get().globalCounter();
+		return globalCounter;
 	}
 
 }

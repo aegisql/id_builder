@@ -1,7 +1,6 @@
 package com.aegisql.id_builder.impl;
 
 import com.aegisql.id_builder.IdParts;
-import com.aegisql.id_builder.IdSource;
 import com.aegisql.id_builder.IdSourceException;
 import org.junit.Test;
 
@@ -105,7 +104,7 @@ public class BinaryIdGeneratorTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void mutliThreadTest() throws InterruptedException {
+    public void multiThreadTest() throws InterruptedException {
         final int threadCount = 20;
         final int iterationsPerThread = 1000000;
         var ig1 = new BinaryIdGenerator();
@@ -128,7 +127,7 @@ public class BinaryIdGeneratorTest {
                     results[thread].add(id);
                     if( j > 0 && j % 100000 == 0 ) {
                         Thread.yield();
-                        System.out.println("thread "+thread+" "+(j*100)/iterationsPerThread+"%");
+//                        System.out.println("thread "+thread+" "+(j*100)/iterationsPerThread+"%");
                     }
                 }
                 latch.countDown();

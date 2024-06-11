@@ -36,10 +36,18 @@ public final class DecimalIdGenerator extends AbstractIdGenerator {
 		this.tf = identity;
 	}
 
+	/**
+	 * Instantiates a new Decimal id generator.
+	 *
+	 * @param startTimeStampSec the start time stamp sec
+	 */
 	public DecimalIdGenerator(long startTimeStampSec) {
 		this(0,startTimeStampSec,9,0 );
 	}
 
+	/**
+	 * Instantiates a new Decimal id generator.
+	 */
 	public DecimalIdGenerator() {
 		this(unixTimestamp());
 	}
@@ -55,9 +63,9 @@ public final class DecimalIdGenerator extends AbstractIdGenerator {
 		this(hostId,System.currentTimeMillis()/1000,idPos,hostIdPos);
 	}
 
-	long buildId(IdState idState) {
-		assert idState.currentId() <= maxId : "current ID exceeded max id";
-		return tf.transformTimestamp(idState.currentTimeStampSec()) * timeIdBase + hostIdBase + idState.currentId();
+	long buildId() {
+		assert currentId <= maxId : "current ID exceeded max id";
+		return tf.transformTimestamp(currentTimeStampSec) * timeIdBase + hostIdBase + currentId;
 	}
 
 	private final static long _10XX19 = 1000000000000000000L;
