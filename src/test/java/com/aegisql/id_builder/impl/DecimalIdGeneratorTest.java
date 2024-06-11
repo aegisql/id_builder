@@ -6,6 +6,7 @@ import static java.lang.System.currentTimeMillis;
 import static org.junit.Assert.*;
 
 import java.util.HashSet;
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -184,22 +185,28 @@ public class DecimalIdGeneratorTest {
 		System.out.println("Max GeneratedID = "+max);
 	}
 
+	public static int getRandomNumber() {
+		Random random = new Random();
+		return 10000 + random.nextInt(90001); // 90001 because nextInt is exclusive of the top value
+	}
+
 	@SuppressWarnings("unchecked")
     @Test
 	public void mutliThreadTest() throws InterruptedException {
 		final int threadCount = 20;
 		final int iterationsPerThread = 1000000;
-		IdSource ig1 = DecimalIdGenerator.idGenerator_10x8();
+		var ig1 = DecimalIdGenerator.idGenerator_10x8();
 		ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
 		CountDownLatch latch = new CountDownLatch(threadCount);
 
 		final Set<Long>[] results = new Set[threadCount];
 		for (int i = 0; i < threadCount; i++) {
-			results[i] = new HashSet<>();
+			results[i] = new HashSet<>(iterationsPerThread);
 		}
 
-		Set<Long> allResults = new HashSet<>();
+		Set<Long> allResults = new HashSet<>(iterationsPerThread*threadCount);
 
+		long startTime = System.nanoTime();
 		for (int i = 0; i < threadCount; i++) {
 			int thread = i;
 			executorService.execute(() -> {
@@ -207,16 +214,18 @@ public class DecimalIdGeneratorTest {
 					long id = ig1.getId();
 					results[thread].add(id);
 					if( j > 0 && j % 100000 == 0 ) {
+						Thread.yield();
 						System.out.println("thread "+thread+" "+(j*100)/iterationsPerThread+"%");
 					}
-
 				}
 				latch.countDown();
 			});
 		}
-
 		boolean await = latch.await(10, TimeUnit.MINUTES);
 		assertTrue(await);
+		long elapsed = System.nanoTime() - startTime;
+		System.out.println("Generated IDs: "+ig1.getGlobalCounter()+" Generation pace: "+ig1.getGlobalCounter()/(elapsed/1000000000.0)/1000000+" M/sec");
+
 		for (int i = 0; i < threadCount; i++) {
 			assertEquals(iterationsPerThread,results[i].size());
 			allResults.addAll(results[i]);
