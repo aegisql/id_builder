@@ -1,4 +1,4 @@
-package com.aegisql.id_builder.synch;
+package com.aegisql.id_builder.old_impl;
 
 import com.aegisql.id_builder.IdSourceException;
 

@@ -16,7 +16,7 @@ public interface TimeTransformer {
 	/**
 	 * The constant adjustingEpochTimestamp.
 	 */
-	long adjustingEpochTimestamp = 1717642585L;
+	long adjustingEpochTimestamp = 1718201409L;
 
 	/**
 	 * The constant identity.

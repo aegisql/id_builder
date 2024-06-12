@@ -1,5 +1,6 @@
 package com.aegisql.id_builder.synch;
 
+import com.aegisql.id_builder.old_impl.TimeHostIdGenerator;
 import org.junit.Test;
 
 import java.util.HashSet;
