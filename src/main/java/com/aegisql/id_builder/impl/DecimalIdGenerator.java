@@ -143,6 +143,14 @@ public final class DecimalIdGenerator extends AbstractIdGenerator {
 		return idGenerator_10x8(0);
 	}
 
+	public static DecimalIdGenerator fromLastKnownId(long lastKnownId, int idPos, int hostIdPos) {
+		var tmpIdGenerator = new DecimalIdGenerator(0, unixTimestamp(), hostIdPos, idPos);
+		var parts = tmpIdGenerator.parse(lastKnownId);
+		var idGenerator = new DecimalIdGenerator(parts.hostId(),parts.timestamp(),hostIdPos,idPos);
+		idGenerator.currentId = parts.currentId();
+		return idGenerator;
+	}
+
 	@Override
 	public String toString() {
         return "DecimalIdGenerator{" +

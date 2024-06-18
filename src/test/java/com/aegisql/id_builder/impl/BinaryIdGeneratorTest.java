@@ -147,5 +147,16 @@ public class BinaryIdGeneratorTest {
 
     }
 
+    @Test
+    public void lastIdTest() {
+        var ig0 = new BinaryIdGenerator(unixTimestamp(), (short) 1,2,4).asStream().skip(10);
+        var ig = BinaryIdGenerator.fromLastKnownId(ig0.findFirst().orElse(-1L), (short) 1,2,4);
+        long id = ig.getId();
+        System.out.println(id);
+        var parts = ig.parse(id);
+        assertEquals(2,parts.hostId());
+        assertEquals(12,parts.currentId()); // this can randomly fail.
+    }
+
 
 }

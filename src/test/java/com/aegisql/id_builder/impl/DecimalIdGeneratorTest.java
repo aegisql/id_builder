@@ -284,4 +284,14 @@ public class DecimalIdGeneratorTest {
 		return parts;
 	}
 
+	@Test
+	public void lastIdTest() {
+		var ig0 = DecimalIdGenerator.idGenerator_10x4x5(1001).asStream().skip(10);
+		var ig = DecimalIdGenerator.fromLastKnownId(ig0.findFirst().orElse(-1L),4,5);
+		long id = ig.getId();
+		System.out.println(id);
+		var parts = ig.parse(id);
+		assertEquals(1001,parts.hostId());
+		assertEquals(12,parts.currentId()); // this can randomly fail.
+	}
 }
