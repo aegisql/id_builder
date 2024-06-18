@@ -83,7 +83,7 @@ public final class BinaryIdGenerator extends AbstractIdGenerator {
 		return new IdParts(tt.transformTimestamp(timestamp),hostId,currentId);
 	}
 
-	public static BinaryIdGenerator fromLastKnownId(long lastId, short timestampExtraBits, int hostId, int hostIdBits) {
+	public static BinaryIdGenerator fromLastKnownId(long lastId, short timestampExtraBits, int hostIdBits) {
 		var tmpIdGenerator = new BinaryIdGenerator(unixTimestamp(),timestampExtraBits,0,hostIdBits);
 		var parts = tmpIdGenerator.parse(lastId);
 		var idGenerator = new BinaryIdGenerator(parts.timestamp(),timestampExtraBits, parts.hostId(), hostIdBits);

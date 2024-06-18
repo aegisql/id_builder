@@ -6,7 +6,6 @@ import static java.lang.System.currentTimeMillis;
 import static org.junit.Assert.*;
 
 import java.util.HashSet;
-import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;

@@ -150,7 +150,7 @@ public class BinaryIdGeneratorTest {
     @Test
     public void lastIdTest() {
         var ig0 = new BinaryIdGenerator(unixTimestamp(), (short) 1,2,4).asStream().skip(10);
-        var ig = BinaryIdGenerator.fromLastKnownId(ig0.findFirst().orElse(-1L), (short) 1,2,4);
+        var ig = BinaryIdGenerator.fromLastKnownId(ig0.findFirst().orElse(-1L), (short) 1,4);
         long id = ig.getId();
         System.out.println(id);
         var parts = ig.parse(id);
